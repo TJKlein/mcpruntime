@@ -111,7 +111,7 @@ graph TD
 
     subgraph Layer3 ["Execution Environment (Sandboxed)"]
         direction TB
-        VM["Runtime Environment (e.g. Microsandbox)"]
+        VM["Runtime Environment (e.g. OpenSandbox)"]
         T["MCP Tools"]
         D["Data Context"]
     end
@@ -138,77 +138,79 @@ graph TD
     K -.->|Observations| A
 ```
 
-## 2. Philosophy: Code Actions as Tools
+## 2. Philosophy: A Pluggable Computational Substrate
 
-Contemporary agent frameworks often conflate planning, execution, and state management. AgentKernel posits that the **execution runtime** is the invariant component of agent systems.
+Contemporary agent frameworks often conflate logic, planning, and execution into monolithic loops. AgentKernel posits a different approach: **the execution runtime should be decoupled and pluggable.**
 
-> **Thesis**: The interesting complexity in agent systems lies not in the prompt engineering, but in the runtime ability to safely execute generated programs — and to **learn from them** by evolving a persistent tool library.
+> **Thesis**: The interesting complexity in agent systems lies not just in prompt engineering, but in the runtime ability to safely execute generated programs across diverse environments — and to **learn from them** by evolving a persistent tool library.
 
-AgentKernel implements the **Programmatic Tool Calling (PTC)** pattern described by [Anthropic](https://www.anthropic.com/engineering/code-execution-with-mcp) and [Cloudflare](https://blog.cloudflare.com/code-mode/), treating tools as importable libraries within a sandboxed environment rather than HTTP endpoints.
+AgentKernel provides a unified API over three foundational execution paradigms:
+1.  **Docker Containers** (via OpenSandbox) for standard workloads.
+2.  **In-Process AST Evaluation** (via Monty) for sub-millisecond reasoning loops.
+3.  **MicroVMs** (via Microsandbox) for total OS-level isolation.
 
-Building on this, AgentKernel introduces the **[Code Actions as Tools](https://gradion-ai.github.io/agents-nanny/2025/12/16/code-actions-as-tools-evolving-tool-libraries-for-agents/)** pattern: code actions that successfully complete a task are automatically extracted, typed, and saved into a persistent skill registry. In future sessions, the agent discovers and reuses these evolved tools — composing them with other tools to solve increasingly complex tasks without re-implementing logic from scratch.
+By standardizing execution, AgentKernel handles the heavy lifting of state management, context limits, and tool persistence, letting developers focus on the agent's cognitive loop.
 
-The key difference from static JSON tool calling is **mutability**: an agent's tool library can evolve at runtime — tools can be added, modified, or composed based on what the agent learns while working.
+### Code Actions as Tools
+
+AgentKernel implements the **Programmatic Tool Calling (PTC)** pattern described by [Anthropic](https://www.anthropic.com/engineering/code-execution-with-mcp) and [Cloudflare](https://blog.cloudflare.com/code-mode/), treating tools as importable libraries rather than HTTP endpoints.
+
+Building on this, AgentKernel introduces **[Code Actions as Tools](https://gradion-ai.github.io/agents-nanny/2025/12/16/code-actions-as-tools-evolving-tool-libraries-for-agents/)**: code actions that successfully complete a task are automatically extracted, typed, and saved into a persistent registry. The agent discovers and reuses these evolved tools in future sessions. **The agent thus serves two roles: a problem solver, and a toolsmith evolving its own capabilities.**
 
 ## 3. Performance & Capabilities
 
-AgentKernel is designed for high-throughput, low-latency execution of agent-generated code.
+AgentKernel is built for high-throughput, low-latency execution of agent-generated code across multiple environments.
 
 | Capability | Specification | Comparison |
 |------------|---------------|------------|
-| **Cold Start** | **< 100ms** | vs 2-5s (AWS Lambda / Containers) |
+| **Cold Start** | **< 10ms** (Monty) or **~1s** (OpenSandbox) | vs 2-5s (AWS Lambda) |
 | **Context** | **Infinite (RLM)** | vs 128k - 2M Tokens (LLM Limit) |
-| **Isolation** | Configurable (MicroVM / Wasm / Process) | vs Container (Docker) |
-| **State** | Volume-mounted persistence | vs Ephemeral / Stateless |
+| **Isolation** | Configurable (AST / Docker / MicroVM) | Built-in via Execution Backends |
+| **State** | Persistent workspace pushing | vs Ephemeral / Stateless |
 | **Cost** | Self-hosted ($0) | vs Cloud metering |
 
-### Key Features
-*   **Model Context Protocol (MCP)**: Native support for MCP tools and patterns.
-*   **Programmatic Tool Calling**: Tools are Python modules, not JSON schemas. Agents write code to use them.
-*   **Code Actions as Tools / Skill Evolution**: Successfully executed code is automatically saved as a typed, callable tool. The agent builds a *Self-Growing Tool Library* that persists across sessions. ([Read the concept →](https://gradion-ai.github.io/agents-nanny/2025/12/16/code-actions-as-tools-evolving-tool-libraries-for-agents/))
-*   **Async Middleware**: "Fire-and-forget" background task execution for long-running jobs.
-*   **Sandbox Pooling**: Pre-warmed pools ensure immediate availability for interactive agents.
-*   **Volume Mounting**: Persistent workspaces allow multi-turn reasoning with state preservation.
-*   **Recursive Language Models (RLM)**: Process infinite context by treating data as variables and recursively querying the LLM.
+### Pluggable Execution Backends
 
-### Execution Backends
-
-AgentKernel supports pluggable execution runtimes to match workload requirements.
+AgentKernel is backend-agnostic. You can hot-swap the execution engine in `config.yaml` to match your workload's security and performance requirements without changing a single line of agent code.
 
 *   **OpenSandbox (Default)**: [Docker-based local sandbox](https://github.com/alibaba/OpenSandbox) by Alibaba.
-    *   *Advantage*: Standard Docker containers — runs any image (Python, Node, etc.) locally with no custom binary. Requires Docker + `opensandbox-server`.
-*   **Microsandbox**: Full Linux MicroVMs.
-    *   *Advantage*: Supports complex system dependencies (compilers, databases, apt packages) and full OS isolation. Set `sandbox_type: microsandbox`.
-*   **Monty (Experimental)**: [High-performance Python interpreter](https://github.com/pydantic/monty).
-    *   *Advantage*: Enables **sub-millisecond cold starts** and **in-process execution bridging**, ideal for pure-logic reasoning loops. Set `sandbox_type: monty`.
+    *   *Best for*: Standard workloads requiring familiar Docker environments. Runs any image (`python`, `node`, etc.) locally.
+*   **Monty**: [High-performance secure Python AST interpreter](https://github.com/pydantic/monty).
+    *   *Best for*: Pure logic, reasoning loops, and CI environments. Delivers **sub-millisecond cold starts** with zero external dependencies.
+*   **Microsandbox**: Full Linux MicroVMs natively isolated via `chroot`/namespaces.
+    *   *Best for*: Untrusted execution needing full system packages (compilers, databases, `apt`). Offers highest OS isolation.
+
+### Key Features
+*   **Model Context Protocol (MCP)**: Native support for MCP tools.
+*   **Skill Evolution (Self-Growing Tool Library)**: Successfully executed code is saved as typed, callable modules that the agent can reuse in future sessions.
+*   **Recursive Language Models (RLM)**: Process infinite context limits by treating data as variables and recursively querying the LLM loop.
+*   **Volume Mounting & State**: Persistent workspaces allow multi-turn reasoning with state preservation.
+*   **Async Middleware**: "Fire-and-forget" background task execution.
 
 ## 4. Manual Installation (Advanced)
 
-If you prefer to install locally without Docker, you must compile the patched `microsandbox` binary manually, as the version on PyPI does not support volume mounting.
-
-### 1. Install Rust & Build Microsandbox
+### 1. Zero-dependency setup (Monty only)
+If you just want to run AgentKernel with no background servers:
 ```bash
-git clone https://github.com/TJKlein/microsandbox.git
-cd microsandbox
-cargo build --release
+pip install agentkernel pydantic-monty
 ```
 
-### 2. Install AgentKernel
+### 2. Full setup with OpenSandbox (Default)
 ```bash
-pip install agentkernel
-```
-
-### 3. (Optional) Install OpenSandbox
-
-If you prefer to use the OpenSandbox Docker-based backend instead of microsandbox:
-
-```bash
-pip install opensandbox opensandbox-server
+pip install agentkernel opensandbox opensandbox-server
 opensandbox-server init-config ~/.sandbox.toml --example docker
 opensandbox-server start
 ```
 
-Then set `sandbox_type: opensandbox` (and optionally `opensandbox_domain: localhost:8080`) in your `config.yaml`.
+### 3. Untrusted workloads setup (Microsandbox)
+Requires compiling the patched binary manually (PyPI version does not support volume mounting).
+```bash
+git clone https://github.com/TJKlein/microsandbox.git
+cd microsandbox
+cargo build --release
+cd ..
+pip install agentkernel
+```
 
 ### 4. Verify Setup
 ```bash
