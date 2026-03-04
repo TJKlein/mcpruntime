@@ -1,20 +1,69 @@
-version: '3.8'
+version: "3.9"
 
 services:
+  # Option A: OpenSandbox (Default)
   agentkernel:
-    build: .
+    build:
+      context: .
+      target: python-only
+    env_file: .env
+    ports:
+      - "8000:8000"
     volumes:
-      - .:/app
-      - agent_data:/data
+      - ./skills:/app/skills
+      - ./workspace:/app/workspace
+      # Mount the docker socket so OpenSandbox can spawn sibling containers
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-      - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY}
-      - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT}
-    # Mount the docker socket if we want to support sibling containers (optional, advanced)
-    # volumes:
-    #   - /var/run/docker.sock:/var/run/docker.sock
-    command: tail -f /dev/null # Keep container running for interactive use
+      - SANDBOX_TYPE=opensandbox
+      - OPENSANDBOX_DOMAIN=host.docker.internal:8080
+
+  # Option C: Microsandbox (Profile)
+  microsandbox:
+    build:
+      context: ./microsandbox
+    privileged: true # required for MicroVM
+    ports:
+      - "7777:7777"
+    volumes:
+      - sandbox_data:/var/sandbox
+    profiles:
+      - microsandbox
+
+  agentkernel-microsandbox:
+    build:
+      context: .
+      target: microsandbox
+    env_file: .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./skills:/app/skills
+      - ./workspace:/app/workspace
+    depends_on:
+      - microsandbox
+    environment:
+      - SANDBOX_TYPE=microsandbox
+      - SANDBOX_HOST=microsandbox
+      - SANDBOX_PORT=7777
+    profiles:
+      - microsandbox
+
+  # Option B: Monty (Profile)
+  agentkernel-monty:
+    build:
+      context: .
+      target: python-only
+    env_file: .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./skills:/app/skills
+      - ./workspace:/app/workspace
+    environment:
+      - SANDBOX_TYPE=monty
+    profiles:
+      - monty
 
 volumes:
-  agent_data:
+  sandbox_data:

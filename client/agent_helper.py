@@ -11,6 +11,7 @@ Minimizes boilerplate code in examples.
 
 import logging
 from typing import Any, Dict, List, Optional, Tuple
+from pathlib import Path
 
 from client.filesystem_helpers import FilesystemHelper
 from client.base import CodeExecutor
@@ -34,6 +35,8 @@ class AgentHelper:
         llm_config: Optional[Any] = None,  # LLMConfig from config.schema
         skill_manager: Optional[Any] = None,  # SkillManager type
         auto_save_skills: bool = True,
+        session_id: Optional[str] = None,
+        replay_logging_enabled: bool = True,
     ):
         """Initialize agent helper.
 
@@ -46,6 +49,8 @@ class AgentHelper:
             llm_config: Optional LLMConfig for LLM-based code generation
             skill_manager: Optional SkillManager for saving/reusing skills
             auto_save_skills: Whether to automatically save successful code as skills
+            session_id: Optional session identifier for replays (auto-generated if None)
+            replay_logging_enabled: Whether to log executions for time-travel debugging
         """
         self.fs_helper = fs_helper
         self.executor = executor
@@ -55,6 +60,10 @@ class AgentHelper:
         self.skill_manager = skill_manager
         self.auto_save_skills = auto_save_skills
         self._tool_cache = None
+        
+        import uuid
+        self.session_id = session_id or str(uuid.uuid4())
+        self.replay_logging_enabled = replay_logging_enabled
         
         # Initialize code generator with LLM config if not provided
         if code_generator is None:
@@ -324,6 +333,26 @@ class AgentHelper:
         if result.value == "success" and self.auto_save_skills and self.skill_manager:
             self._maybe_save_skill(task_description, code, output, verbose)
 
+        # Log execution for replay / time-travel debugging
+        if self.replay_logging_enabled:
+            from agentkernel.replay_log import log_execution
+            
+            # Use the workspace-relative .replay directory
+            log_dir = Path(self.fs_helper.workspace_dir) / ".replay"
+            
+            # Safely get sandbox_type from config if available
+            sandbox_type = "unknown"
+            if hasattr(self.executor, "execution_config") and hasattr(self.executor.execution_config, "sandbox_type"):
+                sandbox_type = self.executor.execution_config.sandbox_type
+
+            log_execution(self.session_id, {
+                "task": task_description,
+                "code": code,
+                "output": str(output) if output else "",
+                "success": result.value == "success",
+                "sandbox_type": sandbox_type
+            }, log_dir=log_dir)
+
         # Print results
         if verbose:
             if result.value == "success":
@@ -399,4 +428,24 @@ class AgentHelper:
         except Exception as e:
             if verbose:
                 logger.warning(f"Failed to auto-save skill {skill_name}: {e}")
+
+    def resume_from(self, session_id: str, step: int) -> None:
+        """Load a previous session and fast-forward the sandbox to a specific step.
+        
+        This enables Time-Travel Debugging by replaying prior code states into the sandbox.
+        """
+        from agentkernel.replay_log import load_session
+        
+        log_dir = Path(self.fs_helper.workspace_dir) / ".replay"
+        entries = load_session(session_id, log_dir=log_dir)[:step]
+        print(f"\n🔄 Fast-forwarding session '{session_id}' to step {step} ({len(entries)} steps)...")
+        
+        # We process each step, explicitly bypassing new LLM generations, and just running the old code
+        for i, entry in enumerate(entries):
+            task_preview = entry['task'][:50] + "..." if len(entry['task']) > 50 else entry['task']
+            print(f"  [{i+1}/{len(entries)}] Replaying: {task_preview}")
+            self.executor.execute(entry["code"])
+            
+        self.session_id = session_id
+        print("✅ Sandbox state restored. Ready for new commands.\n")
 

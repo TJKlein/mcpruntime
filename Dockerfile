@@ -1,4 +1,4 @@
-# Stage 1: Build Microsandbox (Rust)
+# Stage 1: Build Microsandbox (Rust) - Only for target=microsandbox
 FROM rust:1.75-slim-bookworm as builder
 
 # Install build dependencies
@@ -15,8 +15,10 @@ WORKDIR /usr/src/microsandbox
 # Build release binary
 RUN cargo build --release
 
-# Stage 2: Runtime (Python)
-FROM python:3.10-slim-bookworm
+# -----------------------------------------------------------------------------
+# Base Python Stage (for both python-only and microsandbox)
+# -----------------------------------------------------------------------------
+FROM python:3.10-slim-bookworm as python-only
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -24,18 +26,29 @@ RUN apt-get update && apt-get install -y \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# Setup Microsandbox
-COPY --from=builder /usr/src/microsandbox/target/release/msbserver /usr/local/bin/msbserver
-ENV MICROSANDBOX_PATH=/usr/local/bin/msbserver
-
-# Setup AgentKernel
 WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+# Additional dependencies
+RUN pip install fastapi uvicorn httpx sse-starlette pydantic-monty
 COPY . .
 RUN pip install --no-cache-dir -e .
 
 # Configure environment
-ENV SANDBOX_TYPE=microsandbox
 ENV PYTHONPATH=/app
+ENV SANDBOX_TYPE=opensandbox
 
 # Default command
-CMD ["/bin/bash"]
+CMD ["python", "-m", "server.http_server"]
+
+# -----------------------------------------------------------------------------
+# Microsandbox Stage (includes rust binary)
+# -----------------------------------------------------------------------------
+FROM python-only as microsandbox
+
+# Setup Microsandbox
+COPY --from=builder /usr/src/microsandbox/target/release/msbserver /usr/local/bin/msbserver
+ENV MICROSANDBOX_PATH=/usr/local/bin/msbserver
+ENV SANDBOX_TYPE=microsandbox
+
+CMD ["python", "-m", "server.http_server"]

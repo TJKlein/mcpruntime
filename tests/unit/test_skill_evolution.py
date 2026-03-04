@@ -147,6 +147,7 @@ def test_agent_helper_save_on_success(skill_manager):
     executor = MockExecutor()
     
     # Patch code generator to avoid LLM calls or filesystem dependencies during unit tests
+    # Patch code generator to avoid LLM calls or filesystem dependencies during unit tests
     agent = AgentHelper(
         fs_helper=fs_helper,
         executor=executor,

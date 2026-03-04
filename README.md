@@ -19,6 +19,24 @@ What sets AgentKernel apart is its implementation of **[Code Actions as Tools](h
 
 ---
 
+## ⚡️ One-Command Start (Docker)
+
+The fastest way to get started using Docker Compose. This automatically spins up the AgentKernel server with the default OpenSandbox execution backend.
+
+```bash
+git clone https://github.com/TJKlein/AgentKernel
+cd AgentKernel
+cp .env.example .env   # Add your API keys here
+docker compose up
+```
+
+Alternatively, you can run other execution backends using Docker profiles:
+```bash
+docker compose --profile microsandbox up   # Full MicroVM isolation (privileged mode required)
+docker compose --profile monty up          # Zero-dependency, in-process execution
+```
+
+---
 ## ⚡️ Quick Start
 
 AgentKernel works with **three execution backends**. Pick whichever matches your setup — they all work the same way once running.
@@ -183,6 +201,8 @@ AgentKernel is backend-agnostic. You can hot-swap the execution engine in `confi
 ### Key Features
 *   **Model Context Protocol (MCP)**: Native support for MCP tools.
 *   **Skill Evolution (Self-Growing Tool Library)**: Successfully executed code is saved as typed, callable modules that the agent can reuse in future sessions.
+*   **Execution Replay & Time-Travel Debugging**: Seamlessly log and restore sandbox state to rewind and fork previous agent sessions.
+*   **Streaming Execution**: Live, Server-Sent Events (SSE) streaming of long-running execution outputs.
 *   **Recursive Language Models (RLM)**: Process infinite context limits by treating data as variables and recursively querying the LLM loop.
 *   **Volume Mounting & State**: Persistent workspaces allow multi-turn reasoning with state preservation.
 *   **Async Middleware**: "Fire-and-forget" background task execution.
@@ -275,7 +295,33 @@ AgentKernel supports **Recursive Language Models**, a powerful pattern for proce
 
 See `examples/15_recursive_agent.py` for a complete example.
 
-## 8. Development and Testing
+## 8. Execution Replay & Time-Travel Debugging
+
+AgentKernel includes full support for **Time-Travel Debugging**, enabling developers to seamlessly log, rewind, and fork agent sessions.
+
+### How it works
+
+1.  **Automatic Logging**: When enabled, `AgentHelper` automatically logs every execution step (task, logic, generated code, output, and success status) into a persistent JSONL session file in `workspace/.replay/`.
+2.  **State Fast-Forwarding**: If an agent takes a wrong turn or you want to experiment with a different prompt, you can restore the sandbox state to any previous step using `agent.resume_from(session_id, step)`.
+3.  **CLI Playback**: The included `replay.py` CLI allows you to view past sessions and step through them frame-by-frame.
+
+```bash
+python replay.py list                 # View all past sessions
+python replay.py <session-id> <step>  # View a specific session up to a step
+```
+
+> See [`examples/19_replay.py`](examples/19_replay.py) for a complete time-travel demonstration.
+
+## 9. Streaming Execution Output
+
+For long-running tasks, waiting for the final output can break the illusion of an active agent. AgentKernel supports yielding execution outputs line-by-line via Server-Sent Events (SSE).
+
+*   **`StreamingExecutor`**: A wrapper that intercepts executor stdout and yields real-time chunks.
+*   **SSE API**: Exposed via `POST /execute/stream` on the AgentKernel HTTP server.
+
+> See [`examples/18_streaming.py`](examples/18_streaming.py) for a client-side streaming demo.
+
+## 10. Development and Testing
 
 See **[CONTRIBUTING.md](CONTRIBUTING.md)** for setup and contribution guidelines.
 
@@ -289,7 +335,7 @@ make test-all       # Full suite
 
 Without Make: `pytest tests/ -v -m "not live"` for unit+integration; `pytest tests/e2e/ -v` for live E2E (requires `.env`).
 
-## 9. References & Inspiration
+## 11. References & Inspiration
 
 AgentKernel stands on the shoulders of giants.
 

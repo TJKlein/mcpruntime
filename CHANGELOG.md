@@ -13,6 +13,18 @@ All notable changes to this project will be documented in this file.
     - `tests/unit/test_opensandbox_executor.py`: unit tests (import guard, guardrails, mocked execution).
 - **Configuration**:
     - Added `opensandbox_domain` and `opensandbox_image` fields to `ExecutionConfig`.
+- **Docker Compose Profiles**:
+    - Restructured `docker-compose.yml` into profiles: `agentkernel` (OpenSandbox default), `microsandbox` (privileged), and `monty` fallback.
+    - Simplified `Dockerfile` default build to `python-only` target, significantly reducing build time.
+- **Streaming Execution Output**:
+    - `StreamingExecutor` wrapper for yielding live execution text line-by-line.
+    - `POST /execute/stream` Server-Sent Events (SSE) API endpoint in `server/http_server.py`.
+    - Included `examples/18_streaming.py` client demo connecting via `httpx`.
+- **Time-Travel Debugging & Replay**:
+    - Automatic JSONL session logging via `agentkernel/replay_log.py`.
+    - Rewind and fork agent sessions via `AgentHelper.resume_from(session_id, step)`.
+    - Added `replay.py` CLI utility to repo root for playing back sessions frame-by-frame.
+    - Included `examples/19_replay.py` demo.
 
 ### Fixed
 - **Monty Executor**:
