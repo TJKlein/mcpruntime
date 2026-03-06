@@ -23,8 +23,6 @@ from client import (
     TaskManager,  # Async middleware
     SkillManager,  # Skill management
     # Execution
-    MicrosandboxExecutor,
-    MontyExecutor,
     OpenSandboxExecutor,
     SandboxPool,
     CodeExecutor,
@@ -68,8 +66,6 @@ from server import MCPServer, create_server, run_server
 from client.agent_helper import AgentHelper as _AgentHelper
 from client.recursive_agent import RecursiveAgent
 from client.filesystem_helpers import FilesystemHelper as _FilesystemHelper
-from client.sandbox_executor import MicrosandboxExecutor as _MicrosandboxExecutor
-from client.monty_executor import MontyExecutor as _MontyExecutor
 from client.opensandbox_executor import OpenSandboxExecutor as _OpenSandboxExecutor
 from config.loader import load_config as _load_config
 from config.schema import AppConfig as _AppConfig, OptimizationConfig
@@ -87,8 +83,6 @@ __all__ = [
     "TaskManager",  # Async middleware
     "SkillManager",  # Skill management
     # Execution
-    "MicrosandboxExecutor",
-    "MontyExecutor",
     "OpenSandboxExecutor",
     "SandboxPool",
     "CodeExecutor",
@@ -254,34 +248,16 @@ def create_agent(
         skills_dir=skills,
     )
     
-    # Initialize appropriate executor based on config
+    # Initialize OpenSandbox executor (the only supported backend)
     sandbox_type = config.execution.sandbox_type.lower()
-    
-    if sandbox_type == "monty":
-        executor = _MontyExecutor(
-            execution_config=config.execution,
-            guardrail_config=config.guardrails,
-            optimization_config=config.optimizations,
-        )
-        logger.info("Using Monty execution backend")
-    elif sandbox_type == "microsandbox":
-        executor = _MicrosandboxExecutor(
-            execution_config=config.execution,
-            guardrail_config=config.guardrails,
-            optimization_config=config.optimizations,
-        )
-        logger.info("Using Microsandbox execution backend")
-    else:
-        # Default to OpenSandbox
-        executor = _OpenSandboxExecutor(
-            execution_config=config.execution,
-            guardrail_config=config.guardrails,
-            optimization_config=config.optimizations,
-        )
-        if sandbox_type != "opensandbox":
-            logger.warning(f"Unknown sandbox type '{sandbox_type}', falling back to opensandbox")
-        else:
-            logger.info("Using OpenSandbox execution backend")
+    executor = _OpenSandboxExecutor(
+        execution_config=config.execution,
+        guardrail_config=config.guardrails,
+        optimization_config=config.optimizations,
+    )
+    if sandbox_type not in ("opensandbox", "docker"):
+        logger.warning(f"Sandbox type '{sandbox_type}' is no longer supported, using opensandbox")
+    logger.info("Using OpenSandbox execution backend")
     
     # Initialize agent helper
     agent = _AgentHelper(

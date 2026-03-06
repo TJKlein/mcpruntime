@@ -6,7 +6,7 @@
     "description": "Standard FizzBuzz to 1000. Tests branch prediction and simple string formatting.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -24,7 +24,7 @@
     "description": "Compute fib(30) iteratively. Tests loop overhead.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -42,7 +42,7 @@
     "description": "Check 1000 strings for palindromes. Tests string operations.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -60,7 +60,7 @@
     "description": "Sum all primes below 10,000. Tests basic arithmetic.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -78,7 +78,7 @@
     "description": "Generate and sum 100,000 ints via list comprehension. Tests allocation and iter.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -96,7 +96,7 @@
     "description": "Binary search on a 1M element list 10k times. Tests memory access and branching.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -114,7 +114,7 @@
     "description": "Merge sort a list of 10k reverse-sorted elements. Tests recursion and allocation.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "custom",
     "custom_validator": "check_sorted",
@@ -133,7 +133,7 @@
     "description": "Factorize all numbers from 1 to 10,000. Tests CPU-bound nested loops.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -151,7 +151,7 @@
     "description": "Multiply two 100x100 matrices using pure Python nested loops.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -169,7 +169,7 @@
     "description": "Compute edit distance for 100 pairs of strings. Tests dynamic programming.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -187,7 +187,7 @@
     "description": "Solve the 10-queens problem, count all solutions. Tests deep recursion and backtracking.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -205,7 +205,7 @@
     "description": "Solve 3 Sudoku puzzles using backtracking.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -223,7 +223,7 @@
     "description": "Encode and decode a 1MB string. Tests heavy string processing.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -241,7 +241,7 @@
     "description": "Compute a pseudo SHA-256 using pure Python bitwise operations. Tests bitwise logic.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -260,7 +260,7 @@
     "description": "LCS of two 500 character strings. Tests Dynamic Programming and 2D arrays.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -279,7 +279,7 @@
     "description": "Solve TSP for 14 cities using held-karp dynamic programming. Tests exponential DP with bitmasking.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -299,7 +299,7 @@
     "description": "Implement Cooley-Tukey FFT algorithm on 1024 complex points. Tests recursion and complex arithmetic.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -319,7 +319,7 @@
     "description": "Solve 0/1 knapsack with 1000 items and capacity 5000. Tests DP with space optimization.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -339,7 +339,7 @@
     "description": "Implement basic regex engine supporting . * + operators. Tests state machines and backtracking.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [

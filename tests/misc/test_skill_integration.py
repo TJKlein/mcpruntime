@@ -17,7 +17,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from client.skill_manager import SkillManager
-from client.sandbox_executor import MicrosandboxExecutor
+from client.opensandbox_executor import OpenSandboxExecutor
 from config.schema import ExecutionConfig, GuardrailConfig, OptimizationConfig
 
 
@@ -54,7 +54,7 @@ def test_skill_sandbox_integration():
         guardrail_config = GuardrailConfig()
         optimization_config = OptimizationConfig()
         
-        executor = MicrosandboxExecutor(
+        executor = OpenSandboxExecutor(
             execution_config=execution_config,
             guardrail_config=guardrail_config,
             optimization_config=optimization_config,

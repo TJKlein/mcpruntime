@@ -17,7 +17,7 @@ print("=" * 60)
 print("\n[Setup] Checking Docker image...")
 try:
     result = subprocess.run(
-        ["docker", "pull", "microsandbox/python"],
+        ["docker", "pull", "python:3.11-slim"],
         capture_output=True,
         text=True,
         timeout=120

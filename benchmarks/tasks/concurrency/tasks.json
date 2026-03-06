@@ -6,7 +6,7 @@
         "description": "Spawn multiple threads that perform work and wait for completion.",
         "supported_backends": [
             "opensandbox",
-            "subprocess",
+            "subprocess"
         ],
         "validation_type": "exact",
         "tags": [
@@ -24,7 +24,7 @@
         "description": "Execute multiple coroutines concurrently using asyncio.",
         "supported_backends": [
             "opensandbox",
-            "subprocess",
+            "subprocess"
         ],
         "validation_type": "exact",
         "tags": [
@@ -42,7 +42,7 @@
         "description": "Process tasks using a thread pool with limited workers.",
         "supported_backends": [
             "opensandbox",
-            "subprocess",
+            "subprocess"
         ],
         "validation_type": "exact",
         "tags": [
@@ -61,7 +61,7 @@
         "description": "Perform concurrent file I/O using async patterns.",
         "supported_backends": [
             "opensandbox",
-            "subprocess",
+            "subprocess"
         ],
         "validation_type": "exact",
         "tags": [
@@ -80,7 +80,7 @@
         "description": "Implement producer-consumer pattern using queue.Queue.",
         "supported_backends": [
             "opensandbox",
-            "subprocess",
+            "subprocess"
         ],
         "validation_type": "exact",
         "tags": [
@@ -99,7 +99,7 @@
         "description": "Safely increment a shared counter from multiple threads using locks.",
         "supported_backends": [
             "opensandbox",
-            "subprocess",
+            "subprocess"
         ],
         "validation_type": "exact",
         "tags": [
@@ -117,7 +117,7 @@
         "difficulty": "hard",
         "description": "Use multiprocessing for CPU-bound parallel computation.",
         "supported_backends": [
-            "subprocess",
+            "subprocess"
         ],
         "validation_type": "exact",
         "tags": [
@@ -135,7 +135,7 @@
         "description": "Manage many concurrent asyncio tasks.",
         "supported_backends": [
             "opensandbox",
-            "subprocess",
+            "subprocess"
         ],
         "validation_type": "exact",
         "tags": [
@@ -154,7 +154,7 @@
         "description": "Implement threaded map-reduce pattern.",
         "supported_backends": [
             "opensandbox",
-            "subprocess",
+            "subprocess"
         ],
         "validation_type": "exact",
         "tags": [
@@ -173,7 +173,7 @@
         "description": "Combine asyncio with thread pool for mixed workloads.",
         "supported_backends": [
             "opensandbox",
-            "subprocess",
+            "subprocess"
         ],
         "validation_type": "exact",
         "tags": [

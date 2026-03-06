@@ -9,7 +9,6 @@ print("Testing TaskManager (without sandbox execution)...\n")
 from mcpruntime import TaskManager
 from client.agent_helper import AgentHelper
 from client.filesystem_helpers import FilesystemHelper
-from client.sandbox_executor import MicrosandboxExecutor
 from config import load_config
 
 # Create mock agent that doesn't execute
