@@ -416,3 +416,5 @@ If you find MCPRuntime useful, consider starring the repository on GitHub. Stars
 ## License
 
 MIT &copy; 2026 MCPRuntime Team. Developed with the support of the **[Mantix](https://mantix.cloud)** AI Team.
+
+*Please note: MCPRuntime relies on several third-party open-source components, such as Microsandbox and OpenSandbox, which are licensed under the Apache License 2.0. See the `NOTICE` and `LICENSE` files for full details and attribution.*

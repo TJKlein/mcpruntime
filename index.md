@@ -1,39 +1,45 @@
-# **Tassilo J. Klein, Ph.D.**  
-**Director of Machine Learning Research & Principal Scientist**  
+# Tassilo J. Klein, Ph.D.
 
-📍 SAP AI CTO Office | 💡 LLMs, Foundation Models, Structured Data AI  
-🌐 [LinkedIn](https://www.linkedin.com/in/tassiloklein) • [Google Scholar](https://scholar.google.com/citations?user=z7-L4ywAAAAJ)
+**Director of ML Research · Principal Scientist · SAP AI**
 
-> *Building intelligent systems that connect language, knowledge, and enterprise data.*
+[LinkedIn](https://www.linkedin.com/in/tassiloklein) · [Google Scholar](https://scholar.google.com/citations?user=z7-L4ywAAAAJ)
 
----
-
-## 🧠 About Me
-
-I am **Director of Machine Learning Research & Principal Scientist** in the **SAP AI CTO Office**, where I lead research on **large language models (LLMs)**, **foundation models**, and **structured data AI**.  
-My mission is to advance how enterprises leverage AI — by designing systems that can reason over complex structured data, adapt to limited supervision, and integrate domain-specific knowledge with the general capabilities of LLMs.
-
-I oversee strategic research programs that bridge **fundamental machine learning** and **enterprise-scale deployment**, turning scientific innovation into robust, trustworthy AI platforms.  
-This includes developing **foundation models for structured and relational data**, **knowledge-augmented LLMs**, and **agentic AI systems** that coordinate decision-making and automation across business processes.
-
-Over the past decade, I’ve built and led multidisciplinary research teams translating state-of-the-art methods into product-ready technologies — shaping how **AI is applied in large-scale enterprise systems**.  
-Before joining SAP, I conducted postdoctoral research at **MIT CSAIL** and **Harvard Medical School**, focusing on **representation learning** and **multimodal modeling** for medical imaging.  
-I hold a **Ph.D. in Computer Science (summa cum laude)** from the **Technical University of Munich (TUM)** and am a member of the **European Laboratory for Learning and Intelligent Systems (ELLIS)**.
+> *I work on foundation models, agentic AI, and generative interfaces — with a focus on making large-scale AI systems actually work on the messy, structured data that enterprises run on.*
 
 ---
 
-## 🔬 Research Focus
+## About
 
-- Foundation models for **structured/tabular data**  
-- Knowledge-augmented and **privacy-preserving LLMs**  
-- **Representation learning** and contrastive methods  
-- **Intelligent and agentic systems** for enterprise automation  
+I lead ML research at the **SAP AI CTO Office**, where my team works at the frontier of **foundation models**, **agentic AI systems**, and **Generative UI**. My research spans the full stack: from representation learning and self-supervised pre-training to autonomous agent runtimes and AI-native interface generation.
+
+I'm particularly interested in the coordination economics of agentic AI — how protocol-mediated agent systems change the cost structure of enterprise software, and what that implies for how we build and deploy AI at scale. I've open-sourced **[MCPRuntime](https://github.com/TJKlein/mcpruntime)**, a high-performance local runtime for autonomous agents, available on [PyPI](https://pypi.org/project/mcp-agent-runtime/).
+
+Previously: postdoc at **MIT CSAIL** and **Harvard Medical School** (representation learning, multimodal medical imaging). Ph.D. *summa cum laude* from **TU Munich**. Member of **ELLIS**.
+
+---
+
+## Research
+
+| Area | Focus |
+|------|-------|
+| **Agentic AI** | Autonomous agent runtimes, MCP-based tool calling, multi-agent orchestration, self-growing tool libraries |
+| **Foundation Models for Structured Data** | Tabular pre-training, relational reasoning, enterprise-scale data representation |
+| **Generative UI (GenUI)** | AI-driven dynamic interface generation, adaptive UX, intent-to-UI synthesis |
+| **Knowledge-Augmented LLMs** | RAG, privacy-preserving fine-tuning, domain adaptation |
+| **Representation Learning** | Contrastive and self-supervised methods, multimodal alignment |
 
 ---
 
 ## 📄 Selected Publications & Projects
 
 [2026.03] - Released **[MCPRuntime](https://github.com/TJKlein/mcpruntime)** — An open-source, high-performance local runtime for autonomous agents implementing programmatic tool calling and self-growing tool libraries.
+
+[![PyPI](https://img.shields.io/badge/PyPI-mcp--agent--runtime-3775A9?logo=pypi&logoColor=white)](https://pypi.org/project/mcp-agent-runtime/) [![GitHub](https://img.shields.io/badge/GitHub-TJKlein/mcpruntime-181717?logo=github)](https://github.com/TJKlein/mcpruntime)
+
+[2026.02] - New pre-print available on how agentic AI reshapes enterprise boundaries
+* [The Headless Firm: How AI Reshapes Enterprise Boundaries](https://arxiv.org/abs/2602.21401)
+
+[![arXiv](https://img.shields.io/badge/arXiv-2602.21401-29d634.svg)](https://arxiv.org/abs/2602.21401)
 
 [2025.11] - A paper accepted (**spotlight**) at the [EurIPS'25 Workshop on AI for Tabular Data](https://sites.google.com/view/eurips25-ai-td/home)
 * SALT-KG: A Benchmark for Semantics-Aware Learning on Enterprise Tables
@@ -108,24 +114,23 @@ I hold a **Ph.D. in Computer Science (summa cum laude)** from the **Technical Un
 
 ---
 
-## 🧭 Vision & Collaboration
+## Open Source
 
-I aim to advance **AI systems that reason over structured data**, **adapt efficiently**, and **integrate domain knowledge** to support enterprise decision-making.  
-At SAP, I drive the interface between **fundamental AI research** and **strategic enterprise transformation**, shaping how LLMs evolve for real-world impact.
+I believe frontier research should ship. If you're working on agentic AI runtimes, tabular foundation models, or generative interfaces — reach out or open an issue.
 
 ---
 
-## 🤝 Community & Mentorship
+## Service & Mentorship
 
-- Reviewer for ACL, EMNLP, CVPR, and NeurIPS  
-- Mentor to 15+ researchers and Ph.D. students  
+- Program committee / reviewer: ACL, EMNLP, CVPR, NeurIPS
+- Mentored 15+ researchers and Ph.D. students across academia and industry
 - Co-organizer: **ICML 2021 Workshop on Self-Supervised Learning for Reasoning and Perception**
 
 ---
 
-## 👩‍🔬 Former Interns & Where They Are Now
+## Alumni
 
-I’ve had the privilege of mentoring exceptional research interns who have since moved on to leading academic labs and industrial AI teams:
+Former interns who have gone on to research roles at top labs and faculty positions:
 
 - **[Enrico Fini](https://scholar.google.com/citations?user=OQMtSKIAAAAJ&hl=en)** — Member of Technical Staff at **Microsoft AI** (previously Research Scientist at Apple Machine Learning Research)
 
@@ -163,7 +168,4 @@ I’ve had the privilege of mentoring exceptional research interns who have sinc
 
 - **[Robin C. Geyer](https://scholar.google.com/citations?user=beAB8-QAAAAJ&hl=en)** — **Ph.D. Student at the Institute for Machine Learning, ETH Zürich**
 
-<p align="right"><sub>Status to the best of my knowledge as of November 2025.</sub></p>
-
-
-<p align="right"><sub>Last updated — 4 March 2026</sub></p>
+<p align="right"><sub>Last updated — March 2026</sub></p>
