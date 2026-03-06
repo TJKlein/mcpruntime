@@ -1,47 +1,69 @@
-## [0.1.4] - 2026-03-05
-
-### Added
-- Added  file complying with Apache 2.0 attribution for  and .
-
-### Changed
-- Updated  and  to append third-party open-source legal notices.
-- Expanded  to clearly contrast Programmatic Tool Calling (PTC) vs Recursive Language Models (RLM).
-
 # Changelog
 
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## [0.1.5] - 2026-03-06
+## [0.1.6] - 2026-03-06
 
 ### Removed
-- **Microsandbox Backend** (temporarily removed due to SDK incompatibility):
-    - Removed `MicrosandboxExecutor` (`client/sandbox_executor.py`) - Python SDK v0.1.8 incompatible with server v0.2.6.
-    - Removed `benchmarks/microsandbox_server.py` auto-start helper.
-    - Removed microsandbox from all task `supported_backends` lists across 6 categories (75 tasks).
-    - Updated `benchmarks/runner.py`, `benchmarks/cli.py`, `client/__init__.py` to remove microsandbox references.
-    - Docker backend provides equivalent container isolation with better compatibility.
+- **Microsandbox, Monty, and Docker Backends** (simplified to single backend):
+    - **Microsandbox**: Removed due to Python SDK v0.1.8 / server v0.2.6 incompatibility.
+    - **Monty**: Removed due to limited Python support (only 9/19 compute tasks, no PTC support).
+    - **Docker**: Removed in favor of OpenSandbox for unified architecture.
+    - Removed `MicrosandboxExecutor`, `MontyExecutor`, and `DockerBaseline` from codebase.
+    - Removed all three from task `supported_backends` lists across 7 categories (83 tasks).
+    - Updated `benchmarks/runner.py`, `benchmarks/cli.py`, `client/__init__.py` to remove all three backends.
 
 ### Added
 - **MCPRuntime Benchmark Suite (MRBS)** - Production-ready benchmark system:
-    - 75 tasks across 6 categories: compute (19), import_heavy (12), io (12), memory (10), concurrency (10), enterprise (16).
-    - Three validated backends: **Docker** (recommended), **OpenSandbox**, **Monty**.
+    - **83 tasks across 7 categories**:
+        - **PTC** (8): True Programmatic Tool Calling tasks requiring tool imports
+        - **Compute** (19): Standalone algorithmic tasks
+        - **Import-Heavy** (12): Package loading and data processing
+        - **I/O** (12): Filesystem operations
+        - **Memory** (10): Allocation patterns
+        - **Concurrency** (10): Threading and async
+        - **Enterprise** (16): Real-world workflow patterns
+    - Single validated backend: **OpenSandbox** (recommended) with **Subprocess** for development.
     - Two evaluation modes:
         - **Baseline Mode** (`--llm-provider none`): Infrastructure verification with reference code (~100% expected).
         - **LLM Mode** (`--llm-provider azure_openai`): Real agent evaluation with LLM-generated code (~70-90% realistic).
-    - Task difficulty levels: easy (5 tasks), medium (5 tasks), hard (9 tasks).
+    - Task difficulty levels: easy, medium, hard.
     - Validation types: exact match, fuzzy match, custom validators.
     - Metrics: Success Rate, Time-to-Success (TTS), LLM Generation Time, Execution Time, Iterations.
     - Documentation: `docs/benchmark_guide.md`, `docs/benchmark_analysis.md`.
 
+#### OpenSandbox - The Single Backend
+OpenSandbox is now the **only recommended backend** for MRBS:
+- Runs all 83 tasks (100% pass rate on compute, 75% on PTC)
+- Full PTC (Programmatic Tool Calling) support with proper file setup
+- Docker container isolation
+- ~3s per task execution time
+
+#### PTC (Programmatic Tool Calling) Tasks - True PTC Benchmarking
+The PTC category contains **real PTC tasks** where the agent must:
+- Import tools: `from client.mock_mcp_client import call_mcp_tool`
+- Call external tools with correct arguments
+- Handle tool responses and compose multiple tools
+
+**PTC Task Examples:**
+- **PTC01** (easy): Calculator - Sum a list using `call_mcp_tool('calculator', 'add', ...)`
+- **PTC03** (easy): Weather - Get temperature using `call_mcp_tool('weather', 'get_weather', ...)`
+- **PTC04** (medium): Filesystem - Read file using `call_mcp_tool('filesystem', 'read_file', ...)`
+- **PTC06** (medium): Multi-tool - Combine weather + calculator tools
+- **PTC08** (hard): Chained tools - Weather forecast analysis with multiple tool calls
+
+This distinguishes MRBS from standalone code execution benchmarks - it tests true **Programmatic Tool Calling** as defined by Anthropic/Cloudflare.
+
 ### Changed
-- **Backend Recommendations Updated**:
-    - Docker is now the **primary recommended backend** for benchmarking (100% tasks, ~0.4s/task, no server needed).
-    - OpenSandbox for advanced orchestration (100% tasks, ~3s/task, server-based).
-    - Monty for compute-only speed (9/19 tasks, ~0.4s/task, in-process).
-- **CLI Backend Choices**: Removed microsandbox, reordered as `[docker|monty|opensandbox|subprocess]`.
+- **Backend Simplified to OpenSandbox Only**:
+    - **OpenSandbox** is now the sole recommended backend (100% tasks, ~3s/task, full PTC support).
+    - **Subprocess** remains for development only (no isolation, fastest).
+    - Removed Docker, Monty, and Microsandbox to simplify architecture.
+- **CLI Backend Choices**: Now `[opensandbox|subprocess]` only.
 - **Documentation Cleanup**: Removed `MRBS_PROJECT_PLAN.md`, `index.md`, `docs/README.md`.
+- **OpenSandbox Executor Enhanced**: Added support for pushing arbitrary setup files (mock_mcp_client.py, data files) to container for PTC tasks.
 
 ## [0.1.4] - 2026-03-05
 

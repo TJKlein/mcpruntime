@@ -1,0 +1,230 @@
+[
+  {
+    "id": "PTC01",
+    "name": "Calculator: Sum of list",
+    "difficulty": "easy",
+    "description": "Use the calculator tool to sum a list of numbers. Tests basic tool import and calling.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "ptc",
+      "calculator",
+      "tool-calling"
+    ],
+    "reference_code": "from mock_mcp_client import call_mcp_tool\n\nnumbers = [10, 20, 30, 40, 50]\ntotal = 0\nfor n in numbers:\n    total = call_mcp_tool('calculator', 'add', {'a': total, 'b': n})\nprint(f'Sum: {total}')",
+    "expected_output": "Sum: 150\n",
+    "prompt": "Use the calculator tool to calculate the sum of [10, 20, 30, 40, 50]. Import call_mcp_tool from mock_mcp_client, then call it with tool_name='calculator', method='add', and the appropriate arguments. Print the result as 'Sum: {total}'",
+    "setup_files": [
+      {
+        "source": "mock_mcp_client.py",
+        "path": "mock_mcp_client.py"
+      }
+    ]
+  },
+  {
+    "id": "PTC02",
+    "name": "Calculator: Complex expression",
+    "difficulty": "easy",
+    "description": "Use the calculator to evaluate a complex expression. Tests expression parsing via tool.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+    ],
+    "validation_type": "fuzzy",
+    "tags": [
+      "ptc",
+      "calculator",
+      "tool-calling"
+    ],
+    "reference_code": "from mock_mcp_client import call_mcp_tool\n\nresult = call_mcp_tool('calculator', 'calculate', {'expression': '(100 + 200) * 3 - 50'})\nprint(f'Result: {result}')",
+    "expected_output": "Result: 850.0\n",
+    "prompt": "Use the calculator tool to evaluate the expression '(100 + 200) * 3 - 50'. Import call_mcp_tool from mock_mcp_client, call it with tool_name='calculator', method='calculate', and expression in the args. Print the result as 'Result: {value}'",
+    "setup_files": [
+      {
+        "source": "mock_mcp_client.py",
+        "path": "mock_mcp_client.py"
+      }
+    ]
+  },
+  {
+    "id": "PTC03",
+    "name": "Weather: Get temperature",
+    "difficulty": "easy",
+    "description": "Use the weather tool to get temperature for a location. Tests API-style tool calling.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+    ],
+    "validation_type": "custom",
+    "custom_validator": "validate_weather_output",
+    "tags": [
+      "ptc",
+      "weather",
+      "tool-calling",
+      "api"
+    ],
+    "reference_code": "from mock_mcp_client import call_mcp_tool\n\nweather = call_mcp_tool('weather', 'get_weather', {'location': 'Berlin', 'units': 'celsius'})\nprint(f\"Temperature in {weather['location']}: {weather['temperature']}\u00b0{weather['unit'][0].upper()}\")",
+    "expected_output": "Temperature in Berlin: 22\u00b0C\n",
+    "prompt": "Use the weather tool to get the current weather for Berlin in celsius. Import call_mcp_tool from mock_mcp_client, call it with tool_name='weather', method='get_weather', and appropriate arguments. The result will be a dict with 'location', 'temperature', and 'unit' keys. Print as 'Temperature in {location}: {temperature}\u00b0{unit[0].upper()}'",
+    "setup_files": [
+      {
+        "source": "mock_mcp_client.py",
+        "path": "mock_mcp_client.py"
+      }
+    ]
+  },
+  {
+    "id": "PTC04",
+    "name": "Filesystem: Read and process",
+    "difficulty": "medium",
+    "description": "Use filesystem tool to read a file and process its contents. Tests I/O tool calling.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "ptc",
+      "filesystem",
+      "tool-calling",
+      "io"
+    ],
+    "setup_files": [
+      {
+        "source": "mock_mcp_client.py",
+        "path": "mock_mcp_client.py"
+      },
+      {
+        "path": "data/numbers.txt",
+        "content": "10\n20\n30\n40\n50\n"
+      }
+    ],
+    "reference_code": "from mock_mcp_client import call_mcp_tool\n\ncontent = call_mcp_tool('filesystem', 'read_file', {'path': '/workspace/data/numbers.txt'})\nnumbers = [int(line) for line in content.strip().split('\\n') if line]\ntotal = sum(numbers)\nprint(f'Sum of file contents: {total}')",
+    "expected_output": "Sum of file contents: 150\n",
+    "prompt": "Use the filesystem tool to read /workspace/data/numbers.txt, sum the numbers in it, and print 'Sum of file contents: {total}'. Import call_mcp_tool from mock_mcp_client, call it with tool_name='filesystem', method='read_file', and path in the args. The file contains one number per line."
+  },
+  {
+    "id": "PTC05",
+    "name": "Database: Query and aggregate",
+    "difficulty": "medium",
+    "description": "Use database tool to query records and aggregate results. Tests database tool calling.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+    ],
+    "validation_type": "custom",
+    "custom_validator": "validate_database_output",
+    "tags": [
+      "ptc",
+      "database",
+      "tool-calling",
+      "sql"
+    ],
+    "reference_code": "from mock_mcp_client import call_mcp_tool\n\n# Query all users\nusers = call_mcp_tool('database', 'query', {'table': 'users', 'columns': ['age']})\navg_age = sum(u['age'] for u in users) / len(users)\nprint(f'Average user age: {avg_age:.1f}')",
+    "expected_output": "Average user age: 35.0\n",
+    "prompt": "Use the database tool to query the 'users' table and get the 'age' column. Calculate the average age and print 'Average user age: {avg:.1f}'. Import call_mcp_tool from mock_mcp_client, call it with tool_name='database', method='query', and table/columns in the args. The result is a list of dicts with 'age' keys.",
+    "setup_files": [
+      {
+        "source": "mock_mcp_client.py",
+        "path": "mock_mcp_client.py"
+      }
+    ]
+  },
+  {
+    "id": "PTC06",
+    "name": "Multi-tool: Weather + Calculator",
+    "difficulty": "medium",
+    "description": "Use multiple tools together to solve a problem. Tests tool composition.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+    ],
+    "validation_type": "custom",
+    "custom_validator": "validate_multi_tool_output",
+    "tags": [
+      "ptc",
+      "multi-tool",
+      "composition",
+      "weather",
+      "calculator"
+    ],
+    "reference_code": "from mock_mcp_client import call_mcp_tool\n\n# Get weather for multiple cities\ncities = ['Berlin', 'Paris', 'London']\ntemps = []\nfor city in cities:\n    weather = call_mcp_tool('weather', 'get_weather', {'location': city, 'units': 'celsius'})\n    temps.append(weather['temperature'])\n\n# Calculate average temperature using calculator\ntotal = 0\nfor t in temps:\n    total = call_mcp_tool('calculator', 'add', {'a': total, 'b': t})\navg = call_mcp_tool('calculator', 'calculate', {'expression': f'{total} / {len(temps)}'})\n\nprint(f'Average temperature across {len(cities)} cities: {avg}\u00b0C')",
+    "expected_output": "Average temperature across 3 cities: 22.0\u00b0C\n",
+    "prompt": "Get weather for Berlin, Paris, and London using the weather tool, then calculate the average temperature using the calculator tool. Print 'Average temperature across 3 cities: {avg}\u00b0C'. You must use both tools - weather for fetching temps and calculator for the average calculation.",
+    "setup_files": [
+      {
+        "source": "mock_mcp_client.py",
+        "path": "mock_mcp_client.py"
+      }
+    ]
+  },
+  {
+    "id": "PTC07",
+    "name": "Filesystem: List and process files",
+    "difficulty": "hard",
+    "description": "List directory contents and process each file. Tests directory traversal via tools.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "ptc",
+      "filesystem",
+      "tool-calling",
+      "iteration"
+    ],
+    "setup_files": [
+      {
+        "source": "mock_mcp_client.py",
+        "path": "mock_mcp_client.py"
+      },
+      {
+        "path": "data/file1.txt",
+        "content": "100"
+      },
+      {
+        "path": "data/file2.txt",
+        "content": "200"
+      },
+      {
+        "path": "data/file3.txt",
+        "content": "300"
+      }
+    ],
+    "reference_code": "from mock_mcp_client import call_mcp_tool\n\n# List directory\nfiles = call_mcp_tool('filesystem', 'list_directory', {'path': '/workspace/data'})\n\n# Read each file and sum\ntotal = 0\nfor filename in files:\n    if filename.endswith('.txt'):\n        content = call_mcp_tool('filesystem', 'read_file', {'path': f'/workspace/data/{filename}'})\n        total += int(content.strip())\n\nprint(f'Total from {len(files)} files: {total}')",
+    "expected_output": "Total from 3 files: 600\n",
+    "prompt": "List all files in /workspace/data using the filesystem tool, then read each .txt file and sum their contents. Print 'Total from {count} files: {total}'. You must use both list_directory and read_file methods from the filesystem tool."
+  },
+  {
+    "id": "PTC08",
+    "name": "Chained tools: Weather forecast analysis",
+    "difficulty": "hard",
+    "description": "Get forecast, extract data, calculate statistics using multiple tool calls. Tests complex PTC workflows.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+    ],
+    "validation_type": "custom",
+    "custom_validator": "validate_forecast_analysis",
+    "tags": [
+      "ptc",
+      "weather",
+      "calculator",
+      "multi-tool",
+      "analysis"
+    ],
+    "reference_code": "from mock_mcp_client import call_mcp_tool\n\n# Get 5-day forecast\nforecast = call_mcp_tool('weather', 'get_forecast', {'location': 'Berlin', 'days': 5, 'units': 'celsius'})\n\n# Extract temperatures and calculate range\ntemps = [day['temperature'] for day in forecast['forecast']]\nmin_temp = min(temps)\nmax_temp = max(temps)\n\n# Use calculator to compute range\ntemp_range = call_mcp_tool('calculator', 'calculate', {'expression': f'{max_temp} - {min_temp}'})\navg_temp = sum(temps) / len(temps)\n\nprint(f'5-day forecast for Berlin: min={min_temp}\u00b0C, max={max_temp}\u00b0C, range={temp_range}\u00b0C, avg={avg_temp:.1f}\u00b0C')",
+    "expected_output": "5-day forecast for Berlin: min=18\u00b0C, max=26\u00b0C, range=8\u00b0C, avg=22.0\u00b0C\n",
+    "prompt": "Get a 5-day weather forecast for Berlin using the weather tool, extract all temperatures, then use the calculator tool to find the min, max, range, and average. Print '5-day forecast for Berlin: min={min}\u00b0C, max={max}\u00b0C, range={range}\u00b0C, avg={avg:.1f}\u00b0C'. You must call get_forecast first, then process the data, then use the calculator for calculations.",
+    "setup_files": [
+      {
+        "source": "mock_mcp_client.py",
+        "path": "mock_mcp_client.py"
+      }
+    ]
+  }
+]

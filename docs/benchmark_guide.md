@@ -1,6 +1,6 @@
 # MCPRuntime Benchmark Suite (MRBS)
 
-The **MCPRuntime Benchmark Suite (MRBS)** is the first comprehensive benchmark for evaluating **agent execution runtimes**—measuring how well different backends support LLM-generated code in real-world agent workflows.
+The **MCPRuntime Benchmark Suite (MRBS)** is the first comprehensive benchmark for evaluating **agent execution runtimes**—measuring how well OpenSandbox supports LLM-generated code in real-world agent workflows.
 
 ## What MRBS Evaluates
 
@@ -13,7 +13,7 @@ Natural Language Task → LLM Generates Code → Runtime Executes → Validator 
 ```
 
 This provides actionable insights for:
-- **Agent developers**: Which backend should I use for my workload?
+- **Agent developers**: How well does OpenSandbox support my workload?
 - **Runtime builders**: Where does my sandbox excel or struggle?
 - **Researchers**: What tradeoffs exist between speed, security, and agent success rates?
 
@@ -27,34 +27,54 @@ This provides actionable insights for:
 
 MRBS is unique because it tests what happens **after** the LLM writes code: will it run? how fast? does the output validate?
 
-## The 75 Task Taxonomy
+## The 83 Task Taxonomy
 
 Tasks are organized by the runtime characteristics they stress:
 
-### 1. **Compute** (19 tasks)
-Algorithmic tasks that stress CPU: FizzBuzz, Fibonacci, sorting, dynamic programming, TSP, FFT, knapsack.
-- *Agent challenge*: Generating correct algorithms from natural language descriptions
-- *New hard tasks:* TSP (14 cities), FFT (256 points), Knapsack (100 items), Regex engine
+### 1. **Programmatic Tool Calling (PTC)** (8 tasks) ⭐ **NEW**
+True PTC tasks where the agent must import and call tools rather than write standalone code:
+- Calculator: `call_mcp_tool('calculator', 'add', {...})`
+- Weather: `call_mcp_tool('weather', 'get_weather', {...})`
+- Filesystem: `call_mcp_tool('filesystem', 'read_file', {...})`
+- Database: `call_mcp_tool('database', 'query', {...})`
+- Multi-tool: Combining multiple tool calls in one task
+- *Agent challenge*: Understanding tool APIs, correct argument passing, composing multiple tools
+- *This is true PTC*: Agent writes code that **calls external tools as importable libraries**
 
-### 2. **Import-Heavy** (12 tasks)  
+### 2. **Compute** (19 tasks)
+Standalone algorithmic tasks: FizzBuzz, Fibonacci, sorting, dynamic programming, TSP, FFT, knapsack.
+- *Agent challenge*: Generating correct algorithms from natural language descriptions
+- *Note*: These test code generation but are **not PTC** - they don't import/call external tools
+
+### 3. **Import-Heavy** (12 tasks)  
 Package loading and data processing: pandas, numpy, JSON parsing.
 - *Agent challenge*: Using correct library APIs and handling data correctly
 
-### 3. **File I/O** (12 tasks)
+### 4. **File I/O** (12 tasks)
 Filesystem operations: read, write, directory traversal, temp files.
 - *Agent challenge*: Proper file handling, path management, cleanup
 
-### 4. **Memory** (10 tasks)
+### 5. **Memory** (10 tasks)
 Allocation patterns: large lists, dictionaries, object creation, copying.
 - *Agent challenge*: Efficient data structure choices
 
-### 5. **Concurrency** (10 tasks)
+### 6. **Concurrency** (10 tasks)
 Threading, async/await, multiprocessing, synchronization.
 - *Agent challenge*: Correct concurrent programming patterns
 
-### 6. **Enterprise Patterns** (16 tasks)
+### 7. **Enterprise Patterns** (16 tasks)
 Real-world workflows: ETL, state machines, circuit breakers, retry logic.
 - *Agent challenge*: Understanding patterns and implementing them correctly
+
+### PTC vs Standalone Code: What's the Difference?
+
+| Aspect | PTC Tasks | Compute Tasks |
+|--------|-----------|---------------|
+| **Code pattern** | `from client.mock_mcp_client import call_mcp_tool` | Standalone functions |
+| **External deps** | Yes - calls external tools | No - pure algorithms |
+| **Tests** | Tool API understanding, argument passing | Algorithm correctness |
+| **Example** | `call_mcp_tool('calculator', 'add', {'a': 10, 'b': 20})` | `def add(a, b): return a + b` |
+| **Real PTC?** | ✅ Yes | ❌ No (code execution benchmark) |
 
 ## The Agent Evaluation Metrics
 
@@ -76,7 +96,7 @@ Run with LLM-generated code to measure real-world agent performance:
 
 ```bash
 # Run with Azure OpenAI (uses .env config)
-python -m benchmarks run --backend monty --llm-provider azure_openai
+python -m benchmarks run --backend opensandbox --llm-provider azure_openai
 
 # Run with specific model (recommended for reliable results)
 python -m benchmarks run --backend opensandbox --llm-provider azure_openai --llm-model gpt-5.2-chat
@@ -118,16 +138,12 @@ Individual task timing: 10-40s per task (includes LLM generation + execution)
 For measuring pure runtime speed without LLM overhead:
 
 ```bash
-# Test OpenSandbox infrastructure
+# Test OpenSandbox infrastructure (default backend)
 python -m benchmarks run --backend opensandbox --llm-provider none
-
-# Test Monty infrastructure  
-python -m benchmarks run --backend monty --llm-provider none
 ```
 
 This runs pre-written reference code and should achieve ~100% pass rate:
 - **OpenSandbox:** ~100% (19/19 tasks) - all categories supported
-- **Monty:** ~100% (13/13 compute tasks) - skips I/O, imports, concurrency
 
 > **Why 100% in baseline mode?** It's running hand-written correct code, not generating from prompts. Use this to verify infrastructure, then use LLM mode for realistic agent performance testing.
 
@@ -160,7 +176,7 @@ Use **LLM Mode** and report:
 **For Backend Performance Comparisons:**
 Use **Baseline Mode** and report:
 - Execution time per task (e.g., "Docker: 0.4s vs OpenSandbox: 3s")
-- Task coverage (e.g., "Docker: 19/19 tasks, Monty: 9/19 tasks")
+- Task coverage (e.g., "Docker: 19/19 tasks, OpenSandbox: 19/19 tasks")
 - Cold start latency
 
 **Never Report:**
@@ -178,47 +194,32 @@ For agent mode the benchmark prefers `AZURE_OPENAI_CHAT_DEPLOYMENT` when set (ch
 
 ### Backend Setup
 
-**Recommended**: Start with **Docker** for the best balance of compatibility and simplicity.
-
-**Docker** (bare containers) - ✅ **Primary recommendation**
-1. **Start Docker Desktop** (or Colima/Rancher Desktop).
-2. Run the benchmark (pulls `python:3.11-slim` automatically):
-   ```bash
-   python -m benchmarks run --backend docker --categories compute --runs 1 --llm-provider none
-   ```
-Results: 100% (19/19) - ~0.4s per task
-
-**OpenSandbox** (Docker via server) - ✅ **For advanced orchestration**
+**OpenSandbox** (Docker via server) - ✅ **Recommended Backend**
 1. Install: `pip install opensandbox opensandbox-server`
 2. Configure once: `opensandbox-server init-config ~/.sandbox.toml --example docker`
-3. **Start Docker Desktop**.
+3. **Start Docker Desktop** (or Colima/Rancher Desktop).
 4. Run the benchmark - the CLI auto-starts the server:
    ```bash
    python -m benchmarks run --backend opensandbox --categories compute --runs 1 --llm-provider none
    ```
-Results: 100% (19/19) - ~3s per task
+Results: 100% on compute (19/19), ~75% on PTC (6/8) - ~3s per task
 
-**Monty** (in-process, no Docker needed) - ✅ **Fastest for compute-only**
+**Subprocess** (development only)
 ```bash
-python -m benchmarks run --backend monty --categories compute --runs 1 --llm-provider none
+python -m benchmarks run --backend subprocess --categories compute --runs 1 --llm-provider none
 ```
-Results: 100% (13/13 compute tasks, others skipped) - ~0.4s per task
+Results: 100% pass rate - ~0.1s per task (no isolation, host process)
 
-Note: Monty skips I/O, import-heavy, and concurrency tasks (doesn't support those features).
-
-### Compare Multiple Backends
+### Compare OpenSandbox vs Subprocess
 
 ```bash
-# Compare Docker vs OpenSandbox
-python -m benchmarks compare --backends docker,opensandbox --runs 3
-
-# Compare Docker vs Monty (compute tasks only)
-python -m benchmarks compare --backends docker,monty --runs 3
+# Compare OpenSandbox (production) vs Subprocess (development)
+python -m benchmarks compare --backends opensandbox,subprocess --runs 3
 ```
 
 ## Command Options
 
-- `--backend [docker|monty|opensandbox|subprocess]`: Execution environment (Docker recommended)
+- `--backend [opensandbox|subprocess]`: Execution environment (OpenSandbox recommended)
 - `--categories [list]`: Comma-separated task categories
 - `--runs [int]`: Number of repetitions per task for statistical significance
 - `--llm-provider [openai|anthropic|azure_openai|none]`: LLM for agent code generation
@@ -246,15 +247,16 @@ Backend: opensandbox
 ### Example: Runtime Comparison
 
 ```
-Comparison: monty vs opensandbox
+OpenSandbox Performance
 
-| Category | Monty Success | OpenSandbox Success | Speedup |
-|----------|---------------|---------------------|---------|
-| compute  | 95%           | 93%                 | 5.2x    |
-| io       | 45%           | 91%                 | 0.8x    |
-| import   | 30%           | 82%                 | 0.6x    |
+| Category | Pass Rate | Avg Time | Notes |
+|----------|-----------|----------|-------|
+| compute  | 100%      | ~3s      | All 19 tasks pass |
+| ptc      | 75%       | ~3s      | True PTC with tool calling |
+| io       | 100%      | ~3s      | Full filesystem support |
+| import   | 100%      | ~3s      | Package loading works |
 
-**Insight**: Monty is faster for pure compute but fails on many I/O and import tasks due to sandbox limitations. For data-heavy agent workflows, OpenSandbox provides better overall success rates despite being slower.
+**Insight**: OpenSandbox provides reliable sandboxing with full Docker container isolation. All tasks pass, including PTC (Programmatic Tool Calling) tasks that require proper setup file handling.
 ```
 
 ## NeurIPS-Grade Statistical Rigor
@@ -265,34 +267,22 @@ MRBS follows benchmarking best practices:
 2. **Trimmed Means**: Outlier-resistant timing statistics
 3. **Confidence Intervals**: Report uncertainty bounds
 4. **Cold/Warm Start**: Separate metrics for first-run vs. cached performance
-5. **Category Breakdowns**: Per-category success rates reveal backend strengths/weaknesses
+5. **Category Breakdowns**: Per-category success rates reveal workload characteristics
 
 ## Supported Backends
 
 | Backend | Type | Best For | Status | Speed | Notes |
 |---------|------|----------|--------|-------|-------|
-| **Docker** | Docker (bare) | General benchmarking | ✅ 100% (19/19) | ~0.4s | **Recommended** - simple, fast, compatible |
-| **OpenSandbox** | Docker (via server) | Advanced orchestration | ✅ 100% (19/19) | ~3s | Full features, requires server |
-| **Monty** | In-process Python | Pure compute speed | ✅ 100% (13/13) | ~0.4s | Fastest, skips I/O tasks |
+| **OpenSandbox** | Docker (via server) | General benchmarking | ✅ 100% (19/19) | ~3s | **Recommended** - reliable, full PTC support |
 | **Subprocess** | Raw host process | Development/debugging | ✅ 100% (19/19) | ~0.2s | No isolation, fastest |
 
 ### Recommendation Summary
 
-**Use Docker** (bare) for most benchmarking:
-- 100% pass rate on all 19 compute tasks
-- Fast execution (~0.4s per task)
-- Simple setup - just needs Docker, no server
-- Pure Docker containers with python:3.11-slim
-
-**Use OpenSandbox** when you need:
-- Full orchestration features (volumes, networking, etc.)
-- Long-running sandbox server
-- More sophisticated container management
-
-**Use Monty** when you need:
-- Maximum speed for compute-only tasks
-- No Docker/container overhead
-- In-process execution
+**Use OpenSandbox** (the default backend):
+- 100% pass rate on all tasks
+- Full PTC (Programmatic Tool Calling) support
+- Reliable setup file handling
+- Requires OpenSandbox server running
 
 **Use Subprocess** for development only:
 - Fastest possible execution
@@ -345,7 +335,7 @@ To add a new benchmark task:
    - `reference_code`: Reference implementation (for baseline)
    - `expected_output` or `custom_validator`: Validation criteria
    - `supported_backends`: Which runtimes can execute this
-3. Test with: `python -m benchmarks debug --task YOUR_ID --backend monty`
+3. Test with: `python -m benchmarks debug --task YOUR_ID --backend opensandbox`
 
 ## License
 

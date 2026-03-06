@@ -7,7 +7,6 @@
         "supported_backends": [
             "opensandbox",
             "subprocess",
-            "docker"
         ],
         "validation_type": "exact",
         "tags": [
@@ -26,7 +25,6 @@
         "supported_backends": [
             "opensandbox",
             "subprocess",
-            "docker"
         ],
         "validation_type": "exact",
         "tags": [
@@ -45,7 +43,6 @@
         "supported_backends": [
             "opensandbox",
             "subprocess",
-            "docker"
         ],
         "validation_type": "exact",
         "tags": [
@@ -65,7 +62,6 @@
         "supported_backends": [
             "opensandbox",
             "subprocess",
-            "docker"
         ],
         "validation_type": "exact",
         "tags": [
@@ -85,7 +81,6 @@
         "supported_backends": [
             "opensandbox",
             "subprocess",
-            "docker"
         ],
         "validation_type": "exact",
         "tags": [
@@ -105,7 +100,6 @@
         "supported_backends": [
             "opensandbox",
             "subprocess",
-            "docker"
         ],
         "validation_type": "exact",
         "tags": [
@@ -124,7 +118,6 @@
         "description": "Use multiprocessing for CPU-bound parallel computation.",
         "supported_backends": [
             "subprocess",
-            "docker"
         ],
         "validation_type": "exact",
         "tags": [
@@ -143,7 +136,6 @@
         "supported_backends": [
             "opensandbox",
             "subprocess",
-            "docker"
         ],
         "validation_type": "exact",
         "tags": [
@@ -163,7 +155,6 @@
         "supported_backends": [
             "opensandbox",
             "subprocess",
-            "docker"
         ],
         "validation_type": "exact",
         "tags": [
@@ -183,7 +174,6 @@
         "supported_backends": [
             "opensandbox",
             "subprocess",
-            "docker"
         ],
         "validation_type": "exact",
         "tags": [

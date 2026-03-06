@@ -29,8 +29,8 @@ def main():
     
     # RUN command
     run_parser = subparsers.add_parser("run", help="Run benchmarks on a single backend")
-    run_parser.add_argument("--backend", type=str, required=True, choices=["docker", "monty", "opensandbox", "subprocess"],
-                           help="Backend to run on. Docker is recommended for best compatibility.")
+    run_parser.add_argument("--backend", type=str, required=True, choices=["opensandbox", "subprocess"],
+                           help="Backend to run on. OpenSandbox is the recommended backend.")
     run_parser.add_argument("--categories", type=str, help="Comma-separated list of categories (e.g. compute,io)")
     run_parser.add_argument("--difficulties", type=str, help="Comma-separated list of difficulties (e.g. easy,medium)")
     run_parser.add_argument("--tags", type=str, help="Comma-separated list of tags")

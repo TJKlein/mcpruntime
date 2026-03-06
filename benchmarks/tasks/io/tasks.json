@@ -7,7 +7,6 @@
     "supported_backends": [
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -26,7 +25,6 @@
     "supported_backends": [
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -45,7 +43,6 @@
     "supported_backends": [
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -64,7 +61,6 @@
     "supported_backends": [
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -83,7 +79,6 @@
     "supported_backends": [
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -102,7 +97,6 @@
     "supported_backends": [
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -122,7 +116,6 @@
     "supported_backends": [
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -142,7 +135,6 @@
     "supported_backends": [
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -162,7 +154,6 @@
     "supported_backends": [
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -181,7 +172,6 @@
     "supported_backends": [
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -201,7 +191,6 @@
     "supported_backends": [
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -221,7 +210,6 @@
     "supported_backends": [
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [

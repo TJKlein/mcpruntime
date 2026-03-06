@@ -293,6 +293,26 @@ class OpenSandboxExecutor(BaseExecutor):
                 skill_file.read_text(encoding="utf-8"),
             )
 
+        # Setup files from workspace (e.g., mock_mcp_client.py for PTC tasks)
+        # These are files created by the runner's setup_workspace method
+        for setup_file in workspace_path.glob("*.py"):
+            if setup_file.name not in ["_execute_task.py"]:
+                _add_entry(
+                    f"/workspace/{setup_file.name}",
+                    setup_file.read_text(encoding="utf-8"),
+                )
+
+        # data/ directory and other fixture directories
+        for data_dir in workspace_path.glob("data"):
+            if data_dir.is_dir():
+                for data_file in data_dir.rglob("*"):
+                    if data_file.is_file():
+                        relative_path = data_file.relative_to(workspace_path)
+                        _add_entry(
+                            f"/workspace/{relative_path}",
+                            data_file.read_text(encoding="utf-8"),
+                        )
+
         # The task script itself — mirrors microsandbox's _execute_task.py pattern
         task_script = self._build_task_script(code)
         _add_entry("/workspace/_execute_task.py", task_script)

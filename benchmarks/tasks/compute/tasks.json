@@ -5,10 +5,8 @@
     "difficulty": "easy",
     "description": "Standard FizzBuzz to 1000. Tests branch prediction and simple string formatting.",
     "supported_backends": [
-      "monty",
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -25,10 +23,8 @@
     "difficulty": "easy",
     "description": "Compute fib(30) iteratively. Tests loop overhead.",
     "supported_backends": [
-      "monty",
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -45,10 +41,8 @@
     "difficulty": "easy",
     "description": "Check 1000 strings for palindromes. Tests string operations.",
     "supported_backends": [
-      "monty",
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -65,10 +59,8 @@
     "difficulty": "easy",
     "description": "Sum all primes below 10,000. Tests basic arithmetic.",
     "supported_backends": [
-      "monty",
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -85,10 +77,8 @@
     "difficulty": "easy",
     "description": "Generate and sum 100,000 ints via list comprehension. Tests allocation and iter.",
     "supported_backends": [
-      "monty",
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -105,10 +95,8 @@
     "difficulty": "medium",
     "description": "Binary search on a 1M element list 10k times. Tests memory access and branching.",
     "supported_backends": [
-      "monty",
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -127,7 +115,6 @@
     "supported_backends": [
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "custom",
     "custom_validator": "check_sorted",
@@ -145,10 +132,8 @@
     "difficulty": "medium",
     "description": "Factorize all numbers from 1 to 10,000. Tests CPU-bound nested loops.",
     "supported_backends": [
-      "monty",
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -167,7 +152,6 @@
     "supported_backends": [
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -186,7 +170,6 @@
     "supported_backends": [
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -205,7 +188,6 @@
     "supported_backends": [
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -224,7 +206,6 @@
     "supported_backends": [
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -241,10 +222,8 @@
     "difficulty": "hard",
     "description": "Encode and decode a 1MB string. Tests heavy string processing.",
     "supported_backends": [
-      "monty",
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -261,10 +240,8 @@
     "difficulty": "hard",
     "description": "Compute a pseudo SHA-256 using pure Python bitwise operations. Tests bitwise logic.",
     "supported_backends": [
-      "monty",
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -284,7 +261,6 @@
     "supported_backends": [
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -304,7 +280,6 @@
     "supported_backends": [
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -325,7 +300,6 @@
     "supported_backends": [
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -346,7 +320,6 @@
     "supported_backends": [
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -367,7 +340,6 @@
     "supported_backends": [
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [

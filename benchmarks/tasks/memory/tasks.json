@@ -5,10 +5,8 @@
     "difficulty": "easy",
     "description": "Allocate a large list of integers and compute its sum.",
     "supported_backends": [
-      "monty",
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -25,10 +23,8 @@
     "difficulty": "easy",
     "description": "Create a dictionary with many entries and perform lookups.",
     "supported_backends": [
-      "monty",
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -48,7 +44,6 @@
     "supported_backends": [
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -65,10 +60,8 @@
     "difficulty": "medium",
     "description": "Compare different methods of building a large string.",
     "supported_backends": [
-      "monty",
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -85,10 +78,8 @@
     "difficulty": "medium",
     "description": "Create a deeply nested dictionary structure recursively.",
     "supported_backends": [
-      "monty",
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -106,10 +97,8 @@
     "difficulty": "medium",
     "description": "Create a large 2D list (matrix) and access elements.",
     "supported_backends": [
-      "monty",
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -129,7 +118,6 @@
     "supported_backends": [
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -148,7 +136,6 @@
     "supported_backends": [
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -168,7 +155,6 @@
     "supported_backends": [
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [
@@ -187,7 +173,6 @@
     "supported_backends": [
       "opensandbox",
       "subprocess",
-      "docker"
     ],
     "validation_type": "exact",
     "tags": [

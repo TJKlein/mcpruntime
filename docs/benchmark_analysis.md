@@ -198,7 +198,7 @@ Each task is defined as a JSON object with the following schema:
   "name": "FizzBuzz 1–1000",
   "difficulty": "easy",
   "description": "Standard FizzBuzz to 1000. Tests branch prediction.",
-  "supported_backends": ["monty", "opensandbox", "docker"],
+  "supported_backends": ["opensandbox", "subprocess"],
   "validation_type": "exact",
   "tags": ["cpu", "branching"],
   "reference_code": "def fizzbuzz(n): ...",
@@ -282,26 +282,8 @@ def validate_matrix_result(task, output):
 
 | Backend | Tasks Passed | Tasks Skipped | Speed | Notes |
 |---------|--------------|---------------|-------|-------|
-| **Docker** | 19/19 (100%) | 0 | ~0.4s | ✅ Recommended |
-| **OpenSandbox** | 19/19 (100%) | 0 | ~3s | Full orchestration |
-| **Monty** | 9/9 (100%) | 10 | ~0.4s | Compute-only |
-| **Subprocess** | 19/19 (100%) | 0 | ~0.2s | No isolation |
-| **Microsandbox** | N/A | N/A | N/A | ❌ SDK blocked |
-
-### Why Monty Skips Some Tasks
-
-Monty is an in-process Python AST interpreter with limitations:
-
-```python
-# Monty CANNOT execute:
-- Complex subscript assignments: a[0], a[1] = 1, 2
-- Multiple assignments: a, b = b, a  
-- Some list comprehensions with complex expressions
-- I/O operations (file system access)
-- Import statements (no package support)
-```
-
-Tasks A07, A09, A10, A11, A12, A15 are skipped for Monty because they use unsupported Python features.
+| **OpenSandbox** | 19/19 (100%) | 0 | ~3s | ✅ Recommended - reliable, full PTC support |
+| **Subprocess** | 19/19 (100%) | 0 | ~0.2s | Development only - no isolation |
 
 ---
 
@@ -379,7 +361,7 @@ This mimics real agent behavior: retry with error context until success or max r
 For statistical significance, run each task multiple times:
 
 ```bash
-python -m benchmarks run --backend docker --runs 5
+python -m benchmarks run --backend opensandbox --runs 5
 ```
 
 This computes:
@@ -401,34 +383,34 @@ This computes:
 ### Quick Baseline Test (No LLM)
 
 ```bash
-# Fastest - verify infrastructure works
-python -m benchmarks run --backend docker --llm-provider none
-# Result: 100% (19/19) in ~7 seconds
+# Verify infrastructure works
+python -m benchmarks run --backend opensandbox --llm-provider none
+# Result: 100% (19/19)
 ```
 
 ### Real LLM Evaluation
 
 ```bash
 # Actual agent performance (takes longer)
-python -m benchmarks run --backend docker --llm-provider azure_openai
-# Result: ~70-90% pass rate, ~30-180 seconds
+python -m benchmarks run --backend opensandbox --llm-provider azure_openai
+# Result: ~70-90% pass rate
 ```
 
 ### Category-Specific Testing
 
 ```bash
 # Test only compute tasks
-python -m benchmarks run --backend docker --categories compute
+python -m benchmarks run --backend opensandbox --categories compute
 
 # Skip slow/hard tasks for quick iteration
-python -m benchmarks run --backend docker --categories compute --exclude A11,A12,A16
+python -m benchmarks run --backend opensandbox --categories compute --exclude A11,A12,A16
 ```
 
 ### Backend Comparison
 
 ```bash
-# Compare Docker vs Monty
-python -m benchmarks compare --backends docker,monty --runs 3
+# Compare OpenSandbox vs Subprocess
+python -m benchmarks compare --backends opensandbox,subprocess --runs 3
 ```
 
 ---
@@ -448,7 +430,7 @@ python -m benchmarks compare --backends docker,monty --runs 3
 
 | If You Need... | Use | Because |
 |----------------|-----|---------|
-| Fastest benchmark runs | Docker | 0.4s/task, 100% compatibility |
+| Fastest benchmark runs | OpenSandbox | ~3s/task, 100% compatibility, full PTC support |
 | Full agent orchestration | OpenSandbox | Volume mounts, networking, multi-step |
 | Pure compute speed tests | Monty | In-process, no container overhead |
 | No isolation concerns | Subprocess | Fastest, but unsafe |
@@ -475,7 +457,7 @@ MRBS is designed to answer: **"Which backend should I use for my agent workload?
 It measures the complete agent loop end-to-end, from natural language prompt to validated execution. The 19 compute tasks provide a robust test of algorithmic code generation, while the 75 total tasks across 6 categories cover broader agent capabilities.
 
 **For practical benchmarking:**
-- Use **Docker** for most cases (fast, compatible, simple)
+- Use **OpenSandbox** for all cases (reliable, full PTC support)
 - Use **baseline mode** to verify infrastructure
 - Use **LLM mode** for realistic agent evaluation
 - Expect **70-90%** pass rates with LLMs (not 100% - that's normal!)

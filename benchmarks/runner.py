@@ -11,7 +11,6 @@ from config.loader import load_config
 from config.schema import ExecutionConfig
 from client.base import ExecutionResult
 from client.filesystem_helpers import FilesystemHelper
-from client.monty_executor import MontyExecutor
 from client.opensandbox_executor import OpenSandboxExecutor
 
 from .tasks.schema import Task, TaskResult
@@ -27,7 +26,7 @@ class BenchmarkRunner:
         """Initialize runner.
         
         Args:
-            backend: Sandbox backend ("docker", "monty", "opensandbox")
+            backend: Sandbox backend ("docker", "opensandbox")
             n_runs: Number of times to run each task (for statistical variance)
             cold_start: Whether to create a fresh sandbox for each run
             llm_config: Optional LLM configuration for agentic evaluation
@@ -59,18 +58,9 @@ class BenchmarkRunner:
 
     def _create_executor(self):
         """Create a fresh executor instance."""
-        if self.backend == "monty":
-            executor = MontyExecutor(
-                execution_config=self.config.execution,
-                guardrail_config=self.config.guardrails,
-                optimization_config=self.config.optimizations,
-            )
-        elif self.backend == "subprocess":
+        if self.backend == "subprocess":
             from benchmarks.baselines import SubprocessBaseline
             executor = SubprocessBaseline(execution_config=self.config.execution, guardrail_config=self.config.guardrails, optimization_config=self.config.optimizations)
-        elif self.backend == "docker":
-            from benchmarks.baselines import DockerBaseline
-            executor = DockerBaseline(execution_config=self.config.execution, guardrail_config=self.config.guardrails, optimization_config=self.config.optimizations)
         else:
             executor = OpenSandboxExecutor(
                 execution_config=self.config.execution,
