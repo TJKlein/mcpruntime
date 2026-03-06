@@ -216,19 +216,14 @@ class OpenSandboxExecutor(BaseExecutor):
                 if output:
                     logger.debug(f"Output first 1000 chars:\n{output[:1000]}")
 
-                # Append stderr to output for visibility (matches microsandbox behaviour)
+                # Log stderr for debugging but don't append to output (breaks validation)
                 if stderr:
                     logger.debug(f"Stderr: {stderr[:500]}")
-                    if output:
-                        output = output + "\n[STDERR]\n" + stderr
-                    else:
-                        output = "[STDERR]\n" + stderr
 
                 error = None
-                # Detect fatal errors in output (matches microsandbox logic)
-                if output and "Traceback (most recent call last)" in output:
-                    if "Setup error:" in output:
-                        error = output
+                # Detect fatal errors in stderr
+                if stderr and "Traceback (most recent call last)" in stderr:
+                    error = stderr
 
                 await sandbox.kill()
                 return output, error
@@ -309,6 +304,7 @@ class OpenSandboxExecutor(BaseExecutor):
 
         Mirrors the setup code used by MicrosandboxExecutor to ensure imports,
         path configuration, and (optionally) mcp_client are all available.
+        Setup debug output goes to stderr to avoid polluting task stdout.
         """
         setup = "\n".join([
             "import os",
@@ -318,23 +314,18 @@ class OpenSandboxExecutor(BaseExecutor):
             "if '/workspace' not in sys.path:",
             "    sys.path.insert(0, '/workspace')",
             "",
-            "# Verify /workspace is mounted and files exist",
+            "# Verify /workspace is mounted (debug to stderr)",
             "if os.path.exists('/workspace'):",
-            "    print('✅ /workspace is available', flush=True)",
-            "    try:",
-            "        contents = os.listdir('/workspace')",
-            "        print(f'/workspace contents: {contents}', flush=True)",
-            "    except Exception as e:",
-            "        print(f'⚠️ Error listing /workspace: {e}', flush=True)",
+            "    print('✅ /workspace is available', flush=True, file=sys.stderr)",
             "    mcp_client_exists = os.path.exists('/workspace/client/mcp_client.py')",
             "    if mcp_client_exists:",
             "        try:",
             "            from client.mcp_client import call_mcp_tool",
-            "            print('✅ client.mcp_client imported successfully', flush=True)",
+            "            print('✅ client.mcp_client imported', flush=True, file=sys.stderr)",
             "        except Exception as e:",
-            "            print(f'⚠️ client.mcp_client import failed: {e}', flush=True)",
+            "            print(f'⚠️ mcp_client import failed: {e}', flush=True, file=sys.stderr)",
             "else:",
-            "    print('❌ /workspace not available', flush=True)",
+            "    print('❌ /workspace not available', flush=True, file=sys.stderr)",
             "",
             "# === Execute task code ===",
         ])
@@ -346,7 +337,12 @@ class OpenSandboxExecutor(BaseExecutor):
         try:
             lines = execution.logs.stdout
             if lines:
-                return "".join(line.text for line in lines)
+                # Join with newlines and add trailing newline to match expected format
+                result = "\n".join(line.text for line in lines)
+                # Ensure trailing newline if the original output had one
+                if result and not result.endswith("\n"):
+                    result += "\n"
+                return result
         except Exception as e:
             logger.debug(f"Could not extract stdout: {e}")
         return ""
@@ -357,7 +353,7 @@ class OpenSandboxExecutor(BaseExecutor):
         try:
             lines = execution.logs.stderr
             if lines:
-                return "".join(line.text for line in lines)
+                return "\n".join(line.text for line in lines)
         except Exception as e:
             logger.debug(f"Could not extract stderr: {e}")
         return ""

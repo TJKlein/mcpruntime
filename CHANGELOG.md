@@ -13,6 +13,36 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.5] - 2026-03-06
+
+### Removed
+- **Microsandbox Backend** (temporarily removed due to SDK incompatibility):
+    - Removed `MicrosandboxExecutor` (`client/sandbox_executor.py`) - Python SDK v0.1.8 incompatible with server v0.2.6.
+    - Removed `benchmarks/microsandbox_server.py` auto-start helper.
+    - Removed microsandbox from all task `supported_backends` lists across 6 categories (75 tasks).
+    - Updated `benchmarks/runner.py`, `benchmarks/cli.py`, `client/__init__.py` to remove microsandbox references.
+    - Docker backend provides equivalent container isolation with better compatibility.
+
+### Added
+- **MCPRuntime Benchmark Suite (MRBS)** - Production-ready benchmark system:
+    - 75 tasks across 6 categories: compute (19), import_heavy (12), io (12), memory (10), concurrency (10), enterprise (16).
+    - Three validated backends: **Docker** (recommended), **OpenSandbox**, **Monty**.
+    - Two evaluation modes:
+        - **Baseline Mode** (`--llm-provider none`): Infrastructure verification with reference code (~100% expected).
+        - **LLM Mode** (`--llm-provider azure_openai`): Real agent evaluation with LLM-generated code (~70-90% realistic).
+    - Task difficulty levels: easy (5 tasks), medium (5 tasks), hard (9 tasks).
+    - Validation types: exact match, fuzzy match, custom validators.
+    - Metrics: Success Rate, Time-to-Success (TTS), LLM Generation Time, Execution Time, Iterations.
+    - Documentation: `docs/benchmark_guide.md`, `docs/benchmark_analysis.md`.
+
+### Changed
+- **Backend Recommendations Updated**:
+    - Docker is now the **primary recommended backend** for benchmarking (100% tasks, ~0.4s/task, no server needed).
+    - OpenSandbox for advanced orchestration (100% tasks, ~3s/task, server-based).
+    - Monty for compute-only speed (9/19 tasks, ~0.4s/task, in-process).
+- **CLI Backend Choices**: Removed microsandbox, reordered as `[docker|monty|opensandbox|subprocess]`.
+- **Documentation Cleanup**: Removed `MRBS_PROJECT_PLAN.md`, `index.md`, `docs/README.md`.
+
 ## [0.1.4] - 2026-03-05
 
 ### Added

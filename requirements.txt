@@ -1,5 +1,4 @@
 fastmcp>=0.1.0
-microsandbox>=0.1.8
 pydantic>=2.0.0
 pyyaml>=6.0
 typing-extensions>=4.8.0
@@ -11,6 +10,8 @@ fastapi>=0.100.0
 uvicorn>=0.22.0
 sse-starlette>=1.6.0
 pydantic-monty>=0.1.0
+opensandbox>=0.1.0
+opensandbox-server>=0.1.0
 httpx>=0.24.0
 pytest-asyncio>=0.21.0
 

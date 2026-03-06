@@ -4,7 +4,7 @@ This package provides the main framework for code execution with MCP (Model Cont
 
 Architecture:
     - Orchestration: AgentHelper (high-level coordination)
-    - Execution: SandboxExecutor, SandboxPool (code execution)
+    - Execution: MontyExecutor, OpenSandboxExecutor, SandboxPool (code execution)
     - Discovery: FilesystemHelper, ToolSelector (tool discovery/selection)
     - Generation: CodeGenerator (code generation)
     - Validation: GuardrailValidator (safety checks)
@@ -18,7 +18,6 @@ from client.task_manager import TaskManager # Async middleware
 from client.skill_manager import SkillManager # Skill management
 
 # Execution Layer
-from client.sandbox_executor import MicrosandboxExecutor
 from client.monty_executor import MontyExecutor
 from client.opensandbox_executor import OpenSandboxExecutor
 from client.sandbox_pool import SandboxPool
@@ -58,7 +57,6 @@ __all__ = [
     "TaskManager",  # Async middleware
     "SkillManager",  # Skill management
     # Execution
-    "MicrosandboxExecutor",
     "MontyExecutor",
     "OpenSandboxExecutor",
     "SandboxPool",

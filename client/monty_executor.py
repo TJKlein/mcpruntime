@@ -82,11 +82,11 @@ class MontyExecutor(BaseExecutor):
             # Prepare inputs (variables) for Monty
             inputs = {}
             if context and "inputs" in context:
-                inputs = context["inputs"]
-            
+                inputs = dict(context["inputs"])
+            # So that inlined/generated code using `if __name__ == "__main__"` runs correctly
+            inputs["__name__"] = "__main__"
             # Hack: Inject dummy input if empty to avoid pydantic-monty edge cases
-            # (None inputs -> TypeError, Empty inputs -> No variables declared error)
-            if not inputs:
+            if len(inputs) <= 1:
                 inputs["__dummy_input__"] = True
             
             # Provide globals()/locals() shims so LLM-generated code that calls

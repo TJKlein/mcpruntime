@@ -10,14 +10,14 @@ from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
-# Try to import OpenAI
+# Try to import litellm
 try:
-    from openai import OpenAI
-    HAS_OPENAI = True
+    import litellm
+    litellm.drop_params = True # Handle provider-specific param strictness (e.g. gpt-5 temperature)
+    HAS_LITELLM = True
 except ImportError:
-    HAS_OPENAI = False
-    OpenAI = None  # type: ignore
-    logger.warning("openai package not available. LLM-based code generation will be disabled.")
+    HAS_LITELLM = False
+    logger.warning("litellm package not available. LLM-based code generation will be disabled.")
 
 
 class CodeGenerator:
@@ -38,51 +38,23 @@ class CodeGenerator:
         """
         self.include_error_handling = include_error_handling
         self.llm_config = llm_config
+        self.include_error_handling = include_error_handling
+        self.llm_config = llm_config
         self.tool_descriptions = tool_descriptions or {}
-        self._llm_client = None
         
-        # Initialize LLM client if enabled
-        if llm_config and llm_config.enabled and HAS_OPENAI:
-            self._init_llm_client()
+        # Initialize configuration if enabled
+        if llm_config and llm_config.enabled and HAS_LITELLM:
+            self._model_name = llm_config.model
+            # For Azure, we usually prefix the model in litellm
+            if llm_config.provider == "azure_openai":
+                if not self._model_name.startswith("azure/"):
+                    self._model_name = f"azure/{self._model_name}"
+            
+            # Pre-cache api_key and endpoint from config or env
+            self._api_key = llm_config.api_key or os.environ.get("AZURE_OPENAI_API_KEY") or os.environ.get("OPENAI_API_KEY")
+            self._api_base = llm_config.azure_endpoint or os.environ.get("AZURE_OPENAI_ENDPOINT")
+            self._api_version = llm_config.azure_api_version or os.environ.get("AZURE_OPENAI_API_VERSION")
     
-    def _init_llm_client(self):
-        """Initialize OpenAI client based on config."""
-        if not self.llm_config or not HAS_OPENAI:
-            return
-        
-        try:
-            # Try Azure API key first, then fallback to OpenAI API key
-            api_key = (
-                self.llm_config.api_key or 
-                os.environ.get("AZURE_OPENAI_API_KEY") or 
-                os.environ.get("OPENAI_API_KEY")
-            )
-            if not api_key:
-                logger.warning("LLM enabled but no API key found. Falling back to rule-based generation.")
-                return
-            
-            if self.llm_config.provider == "azure_openai":
-                from openai import AzureOpenAI
-                if not self.llm_config.azure_endpoint:
-                    logger.warning("Azure OpenAI enabled but no endpoint configured.")
-                    return
-                if not self.llm_config.azure_deployment_name:
-                    logger.warning("Azure OpenAI enabled but no deployment name configured.")
-                    return
-                self._llm_client = AzureOpenAI(
-                    api_key=api_key,
-                    api_version=self.llm_config.azure_api_version,
-                    azure_endpoint=self.llm_config.azure_endpoint,
-                )
-                self._model_name = self.llm_config.azure_deployment_name
-            else:
-                self._llm_client = OpenAI(api_key=api_key)
-                self._model_name = self.llm_config.model
-            
-            logger.info(f"Initialized LLM client: {self.llm_config.provider} / {self._model_name}")
-        except Exception as e:
-            logger.warning(f"Failed to initialize LLM client: {e}. Falling back to rule-based generation.")
-            self._llm_client = None
 
     def generate_imports(self, required_tools: Dict[str, List[str]]) -> List[str]:
         """Generate import statements for required tools.
@@ -263,7 +235,8 @@ print(f"{tool_name}() = {{result}}")"""
         Returns:
             Generated code string or None if LLM generation fails
         """
-        if not self._llm_client or not self.llm_config:
+        if not HAS_LITELLM or not self.llm_config:
+            return None
             return None
         
         try:
@@ -310,24 +283,28 @@ Generated code:"""
                     {"role": "system", "content": "You are a helpful code generator that creates clean, executable Python code."},
                     {"role": "user", "content": prompt}
                 ],
+                "api_key": self._api_key,
+                "api_base": self._api_base,
+                "api_version": self._api_version,
             }
             # Model gpt-5.2-chat accepts only the default temperature (1.0).
             if self._model_name and "gpt-5.2-chat" in self._model_name:
                 completion_params["temperature"] = 1.0
             else:
                 completion_params["temperature"] = self.llm_config.temperature
-            use_completion_tokens = (
-                getattr(self.llm_config, "max_completion_tokens", None)
-                or (self._model_name and ("gpt-5" in self._model_name or "gpt-4o" in self._model_name))
-            )
-            if use_completion_tokens:
-                completion_params["max_completion_tokens"] = (
-                    getattr(self.llm_config, "max_completion_tokens", None) or self.llm_config.max_tokens
-                )
+            # Some Azure deployments (e.g. codex-mini) only accept max_tokens; chat models accept max_completion_tokens.
+            token_val = getattr(self.llm_config, "max_completion_tokens", None) or self.llm_config.max_tokens
+            if self._model_name and "codex" in self._model_name.lower():
+                completion_params["max_tokens"] = token_val
+            elif (
+                self._model_name
+                and ("gpt-5.2-chat" in self._model_name or "gpt-4o" in self._model_name)
+            ) or (self.llm_config.provider == "azure_openai" and self._model_name and "chat" in self._model_name.lower()):
+                completion_params["max_completion_tokens"] = token_val
             else:
-                completion_params["max_tokens"] = self.llm_config.max_tokens
+                completion_params["max_tokens"] = token_val
 
-            response = self._llm_client.chat.completions.create(**completion_params)
+            response = litellm.completion(**completion_params)
             
             generated_code = response.choices[0].message.content.strip()
             
@@ -370,7 +347,7 @@ Generated code:"""
         imports = self.generate_imports(required_tools)
         
         # Try LLM generation if enabled
-        if self._llm_client and self.llm_config and self.llm_config.enabled:
+        if HAS_LITELLM and self.llm_config and self.llm_config.enabled:
             llm_usage = self._generate_code_with_llm(required_tools, task_description, imports, skill_listing)
             if llm_usage:
                 usage = [llm_usage]
@@ -384,9 +361,15 @@ Generated code:"""
         default_header = """# Import tools from filesystem (written by sandbox executor)
 # https://www.anthropic.com/engineering/code-execution-with-mcp
 """
+        # Ensure header is valid Python (comment lines) so standalone execution (e.g. MRBS) never gets syntax errors
+        raw_header = header_comment or default_header
+        if raw_header.strip() and not raw_header.strip().startswith("#"):
+            header = "\n".join("# " + line if line.strip() else line for line in raw_header.splitlines())
+            if not header.endswith("\n"):
+                header += "\n"
+        else:
+            header = raw_header
 
-        header = header_comment or default_header
-        
         if skill_listing:
             header += f"\n{skill_listing}\n"
 

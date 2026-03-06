@@ -1,0 +1,201 @@
+[
+  {
+    "id": "D01",
+    "name": "Create and sum large list",
+    "difficulty": "easy",
+    "description": "Allocate a large list of integers and compute its sum.",
+    "supported_backends": [
+      "monty",
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "memory",
+      "allocation"
+    ],
+    "reference_code": "data = [i * 2 for i in range(100000)]\nprint(f'Length: {len(data)}')\nprint(f'Sum: {sum(data)}')",
+    "expected_output": "Length: 100000\nSum: 9999900000\n",
+    "prompt": "Create a list of 100,000 integers where each element is its index multiplied by 2. Print the length of the list and the sum of all elements."
+  },
+  {
+    "id": "D02",
+    "name": "Build large dictionary",
+    "difficulty": "easy",
+    "description": "Create a dictionary with many entries and perform lookups.",
+    "supported_backends": [
+      "monty",
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "memory",
+      "dict",
+      "hash"
+    ],
+    "reference_code": "data = {f'key_{i}': i * i for i in range(50000)}\nlookups = sum(1 for i in range(0, 50000, 100) if f'key_{i}' in data)\nprint(f'Dict size: {len(data)}')\nprint(f'Lookups found: {lookups}')\nprint(f'Value 45000: {data[\"key_45000\"]}')",
+    "expected_output": "Dict size: 50000\nLookups found: 500\nValue 45000: 2025000000\n",
+    "prompt": "Create a dictionary with 50,000 entries where keys are 'key_{i}' and values are i*i. Perform lookups for every 100th key and count successful finds. Print the dict size, lookup count, and value for 'key_45000'."
+  },
+  {
+    "id": "D03",
+    "name": "Set operations on large sets",
+    "difficulty": "easy",
+    "description": "Create large sets and compute union, intersection, and difference.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "memory",
+      "set"
+    ],
+    "reference_code": "s1 = set(range(0, 20000, 2))\ns2 = set(range(0, 20000, 3))\nprint(f'Union: {len(s1 | s2)}')\nprint(f'Intersection: {len(s1 & s2)}')\nprint(f'Difference: {len(s1 - s2)}')\nprint(f'Symmetric Diff: {len(s1 ^ s2)}')",
+    "expected_output": "Union: 13333\nIntersection: 3334\nDifference: 6666\nSymmetric Diff: 9999\n",
+    "prompt": "Create two sets: s1 with even numbers from 0 to 19998, s2 with multiples of 3 from 0 to 19998. Print the sizes of their union, intersection, difference (s1-s2), and symmetric difference."
+  },
+  {
+    "id": "D04",
+    "name": "String building comparison",
+    "difficulty": "medium",
+    "description": "Compare different methods of building a large string.",
+    "supported_backends": [
+      "monty",
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "memory",
+      "strings"
+    ],
+    "reference_code": "s1 = ''\nfor i in range(10000):\n    s1 += 'A'\n\ns2 = ''.join(['A' for _ in range(10000)])\nprint(f'Match: {s1 == s2}')\nprint(f'Length: {len(s1)}')",
+    "expected_output": "Match: True\nLength: 10000\n",
+    "prompt": "Build a string of 10,000 'A' characters in two ways: (1) by concatenating in a loop, (2) using list join. Verify they match and print the result and length."
+  },
+  {
+    "id": "D05",
+    "name": "Build nested dictionary tree",
+    "difficulty": "medium",
+    "description": "Create a deeply nested dictionary structure recursively.",
+    "supported_backends": [
+      "monty",
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "memory",
+      "dict",
+      "tree"
+    ],
+    "reference_code": "def build_tree(depth, breadth):\n    if depth == 0: return 'leaf'\n    return {f'child_{i}': build_tree(depth - 1, breadth) for i in range(breadth)}\n\ntree = build_tree(6, 4) # 4^6 = 4096 leaves\n\ndef count_leaves(node):\n    if isinstance(node, str): return 1\n    return sum(count_leaves(child) for child in node.values())\n\nprint(f'Total leaves: {count_leaves(tree)}')\nprint(f'Keys at root: {len(tree)}')",
+    "expected_output": "Total leaves: 4096\nKeys at root: 4\n",
+    "prompt": "Recursively build a tree dictionary with depth 6 and 4 children per node. Count and print the total number of leaf nodes (should be 4096) and the number of keys at the root level."
+  },
+  {
+    "id": "D06",
+    "name": "Allocate 2D grid",
+    "difficulty": "medium",
+    "description": "Create a large 2D list (matrix) and access elements.",
+    "supported_backends": [
+      "monty",
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "memory",
+      "allocation",
+      "2d"
+    ],
+    "reference_code": "grid = [[i * j for j in range(1000)] for i in range(1000)]\nprint(f'Grid size: {len(grid)}x{len(grid[0])}')\nprint(f'grid[500][500]: {grid[500][500]}')",
+    "expected_output": "Grid size: 1000x1000\ngrid[500][500]: 250000\n",
+    "prompt": "Create a 1000x1000 grid where each cell [i][j] contains i*j. Print the grid dimensions and the value at position [500][500]."
+  },
+  {
+    "id": "D07",
+    "name": "Generator vs list memory",
+    "difficulty": "medium",
+    "description": "Compare memory usage patterns of generators vs lists.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "memory",
+      "generator"
+    ],
+    "reference_code": "import time\nt1 = time.time()\ns_list = sum([i * 2 for i in range(1000000)])\nt2 = time.time()\ns_gen = sum(i * 2 for i in range(1000000))\nt3 = time.time()\nprint(f'Matches: {s_list == s_gen}')\nprint('List faster: IGNORED') # Unreliable, just returning the bool to check output parsing\n# We rely on exact string matching for the boolean value, which is generally True in Python but varies by environment.\n# For benchmark stability, we'll just print the boolean.\nprint('Values computed')",
+    "expected_output": "Matches: True\nList faster: IGNORED\nValues computed\n",
+    "prompt": "Compute the sum of i*2 for i from 0 to 999999 using both a list comprehension and a generator expression. Verify the results match and print True/False for whether they match, along with 'Values computed'."
+  },
+  {
+    "id": "D08",
+    "name": "Create many class instances",
+    "difficulty": "hard",
+    "description": "Instantiate a large number of simple objects.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "memory",
+      "class",
+      "objects"
+    ],
+    "reference_code": "class Point:\n    __slots__ = ['x', 'y']\n    def __init__(self, x, y):\n        self.x = x\n        self.y = y\n\npoints = [Point(i, i*2) for i in range(100000)]\nprint(f'Points created: {len(points)}')\nprint(f'Point 50000: x={points[50000].x}, y={points[50000].y}')",
+    "expected_output": "Points created: 100000\nPoint 50000: x=50000, y=100000\n",
+    "prompt": "Define a Point class with __slots__ for x and y. Create 100,000 Point instances where point i has coordinates (i, i*2). Print the count and the coordinates of point 50000."
+  },
+  {
+    "id": "D09",
+    "name": "Deep copy nested structure",
+    "difficulty": "hard",
+    "description": "Use copy.deepcopy on a complex nested data structure.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "memory",
+      "copy"
+    ],
+    "reference_code": "import copy\ndata = [{'id': i, 'meta': [i, i+1, i+2], 'config': {'active': i%2==0}} for i in range(10000)]\ncopied = copy.deepcopy(data)\ncopied[0]['meta'][0] = 999\nprint(f'Original unchanged: {data[0][\"meta\"][0] == 0}')\nprint(f'Copied length: {len(copied)}')\nprint(f'Copied[5000] config: {copied[5000][\"config\"]}')",
+    "expected_output": "Original unchanged: True\nCopied length: 10000\nCopied[5000] config: {'active': True}\n",
+    "prompt": "Create a list of 10,000 dictionaries with nested structure, deep copy it, modify the copy, and verify the original is unchanged. Print whether original is unchanged, the copied length, and the config of item 5000."
+  },
+  {
+    "id": "D10",
+    "name": "Sort large tuple list",
+    "difficulty": "hard",
+    "description": "Sort a large list of complex tuples by multiple keys.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "memory",
+      "sort"
+    ],
+    "reference_code": "import random\nrandom.seed(42)\ndata = [(random.randint(1, 1000), f'str_{random.randint(1,5000)}', random.random()) for _ in range(100000)]\nsorted_data = sorted(data, key=lambda x: (x[1], x[0]))\nprint(f'Sorted length: {len(sorted_data)}')\nprint(f'First item (str, int): {sorted_data[0][1]}, {sorted_data[0][0]}')",
+    "expected_output": "Sorted length: 100000\nFirst item (str, int): str_1, 118\n",
+    "prompt": "Generate 100,000 random tuples of (int, str, float) using seed 42. Sort by the string then the integer. Print the sorted length and the first item's string and integer."
+  }
+]

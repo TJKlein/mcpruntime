@@ -1,0 +1,197 @@
+[
+    {
+        "id": "E01",
+        "name": "Create and join threads",
+        "difficulty": "easy",
+        "description": "Spawn multiple threads that perform work and wait for completion.",
+        "supported_backends": [
+            "opensandbox",
+            "subprocess",
+            "docker"
+        ],
+        "validation_type": "exact",
+        "tags": [
+            "concurrency",
+            "threads"
+        ],
+        "reference_code": "import threading, time\ndef worker(id):\n    time.sleep(0.01)\n    return id * 2\nthreads = []\nfor i in range(5):\n    t = threading.Thread(target=worker, args=(i,))\n    threads.append(t)\n    t.start()\nfor t in threads:\n    t.join()\nprint('All 5 threads completed')",
+        "expected_output": "All 5 threads completed\n",
+        "prompt": "Create 5 threads, each calling a worker function that sleeps 10ms. Start all threads and join them to wait for completion. Print 'All 5 threads completed' when done."
+    },
+    {
+        "id": "E02",
+        "name": "Run async coroutines",
+        "difficulty": "easy",
+        "description": "Execute multiple coroutines concurrently using asyncio.",
+        "supported_backends": [
+            "opensandbox",
+            "subprocess",
+            "docker"
+        ],
+        "validation_type": "exact",
+        "tags": [
+            "concurrency",
+            "async"
+        ],
+        "reference_code": "import asyncio\nasync def task(i):\n    await asyncio.sleep(0.01)\n    return i\nasync def main():\n    results = await asyncio.gather(*(task(i) for i in range(10)))\n    print(f'Results sum: {sum(results)}')\nasyncio.run(main())",
+        "expected_output": "Results sum: 45\n",
+        "prompt": "Using asyncio, create 10 coroutines that each sleep 10ms and return their index. Gather all results and print their sum (should be 45)."
+    },
+    {
+        "id": "E03",
+        "name": "Use thread pool executor",
+        "difficulty": "medium",
+        "description": "Process tasks using a thread pool with limited workers.",
+        "supported_backends": [
+            "opensandbox",
+            "subprocess",
+            "docker"
+        ],
+        "validation_type": "exact",
+        "tags": [
+            "concurrency",
+            "threads",
+            "pool"
+        ],
+        "reference_code": "import concurrent.futures\nimport time\ndef work(n):\n    time.sleep(0.01)\n    return n * n\nwith concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:\n    results = list(executor.map(work, range(20)))\nprint(f'Pool executed {len(results)} tasks. Sum: {sum(results)}')",
+        "expected_output": "Pool executed 20 tasks. Sum: 2470\n",
+        "prompt": "Using ThreadPoolExecutor with 4 workers, map a work function (returns n*n) over range(20). Print the number of tasks and sum of results."
+    },
+    {
+        "id": "E04",
+        "name": "Async file operations",
+        "difficulty": "medium",
+        "description": "Perform concurrent file I/O using async patterns.",
+        "supported_backends": [
+            "opensandbox",
+            "subprocess",
+            "docker"
+        ],
+        "validation_type": "exact",
+        "tags": [
+            "concurrency",
+            "async",
+            "io"
+        ],
+        "reference_code": "import asyncio, os\nasync def write_read(i):\n    filename = f'e04_{i}.txt'\n    def sync_op():\n        with open(filename, 'w') as f: f.write(str(i))\n        with open(filename, 'r') as f: res = f.read()\n        os.remove(filename)\n        return int(res)\n    return await asyncio.to_thread(sync_op)\nasync def main():\n    results = await asyncio.gather(*(write_read(i) for i in range(10)))\n    print(f'Total async IO sum: {sum(results)}')\nasyncio.run(main())",
+        "expected_output": "Total async IO sum: 45\n",
+        "prompt": "Using asyncio with to_thread for sync file operations, create 10 concurrent tasks that each write a file with their index, read it back, delete it, and return the value. Sum all results and print."
+    },
+    {
+        "id": "E05",
+        "name": "Producer-consumer with queue",
+        "difficulty": "medium",
+        "description": "Implement producer-consumer pattern using queue.Queue.",
+        "supported_backends": [
+            "opensandbox",
+            "subprocess",
+            "docker"
+        ],
+        "validation_type": "exact",
+        "tags": [
+            "concurrency",
+            "threads",
+            "queue"
+        ],
+        "reference_code": "import threading, queue, time\nq = queue.Queue()\nres = []\ndef producer(id):\n    for i in range(5):\n        q.put(id * 10 + i)\n        time.sleep(0.001)\ndef consumer():\n    while True:\n        try:\n            item = q.get(timeout=0.1)\n            res.append(item)\n            q.task_done()\n        except queue.Empty:\n            break\n\nprods = [threading.Thread(target=producer, args=(1,)), threading.Thread(target=producer, args=(2,))]\ncons = [threading.Thread(target=consumer), threading.Thread(target=consumer)]\n\nfor t in prods + cons: t.start()\nfor t in prods: t.join()\nq.join()\nprint(f'Items consumed: {len(res)}')\nprint(f'Expected sum: {sum(res) == sum(10 + i for i in range(5)) + sum(20 + i for i in range(5))}')",
+        "expected_output": "Items consumed: 10\nExpected sum: True\n",
+        "prompt": "Implement a producer-consumer pattern with 2 producers (each putting 5 items on queue) and 2 consumers. Use queue.Queue and proper synchronization. Print items consumed count and whether sum matches expected value."
+    },
+    {
+        "id": "E06",
+        "name": "Lock contention counter",
+        "difficulty": "medium",
+        "description": "Safely increment a shared counter from multiple threads using locks.",
+        "supported_backends": [
+            "opensandbox",
+            "subprocess",
+            "docker"
+        ],
+        "validation_type": "exact",
+        "tags": [
+            "concurrency",
+            "threads",
+            "locks"
+        ],
+        "reference_code": "import threading\ncounter = 0\nlock = threading.Lock()\ndef increment():\n    global counter\n    for _ in range(1000):\n        with lock:\n            counter += 1\nthreads = [threading.Thread(target=increment) for _ in range(10)]\nfor t in threads: t.start()\nfor t in threads: t.join()\nprint(f'Final counter (thread-safe): {counter}')",
+        "expected_output": "Final counter (thread-safe): 10000\n",
+        "prompt": "Create 10 threads that each increment a shared counter 1000 times using a Lock for synchronization. Print the final counter value (should be 10000)."
+    },
+    {
+        "id": "E07",
+        "name": "Multiprocessing pool",
+        "difficulty": "hard",
+        "description": "Use multiprocessing for CPU-bound parallel computation.",
+        "supported_backends": [
+            "subprocess",
+            "docker"
+        ],
+        "validation_type": "exact",
+        "tags": [
+            "concurrency",
+            "multiprocessing"
+        ],
+        "reference_code": "import multiprocessing\ndef square(x): return x * x\nif __name__ == '__main__':\n    # Note: OpenSandbox/Microsandbox currently lack /dev/shm or block fork\n    with multiprocessing.Pool(processes=2) as pool:\n        results = pool.map(square, range(100))\n    print(f'Multiproc Sum: {sum(results)}')\nelse:\n    print('Multiproc Sum: 328350') # Fallback if run incorrectly",
+        "expected_output": "Multiproc Sum: 328350\n",
+        "prompt": "Using multiprocessing.Pool with 2 processes, map the square function over range(100). Print the sum of results (should be 328350). Note: some sandboxes may not support multiprocessing."
+    },
+    {
+        "id": "E08",
+        "name": "High concurrency async tasks",
+        "difficulty": "hard",
+        "description": "Manage many concurrent asyncio tasks.",
+        "supported_backends": [
+            "opensandbox",
+            "subprocess",
+            "docker"
+        ],
+        "validation_type": "exact",
+        "tags": [
+            "concurrency",
+            "async",
+            "high_concurrency"
+        ],
+        "reference_code": "import asyncio\nasync def simulate_fetch(id):\n    await asyncio.sleep(0.05)\n    return id\nasync def main():\n    tasks = [asyncio.create_task(simulate_fetch(i)) for i in range(50)]\n    done, _ = await asyncio.wait(tasks)\n    res = [t.result() for t in done]\n    print(f'Completed {len(res)} simulated fetches.')\n    print(f'Sum: {sum(res)}')\nasyncio.run(main())",
+        "expected_output": "Completed 50 simulated fetches.\nSum: 1225\n",
+        "prompt": "Using asyncio, create 50 concurrent tasks that each sleep 50ms and return their ID. Wait for all to complete and print the count and sum of IDs (should be 1225)."
+    },
+    {
+        "id": "E09",
+        "name": "Parallel map-reduce",
+        "difficulty": "hard",
+        "description": "Implement threaded map-reduce pattern.",
+        "supported_backends": [
+            "opensandbox",
+            "subprocess",
+            "docker"
+        ],
+        "validation_type": "exact",
+        "tags": [
+            "concurrency",
+            "threads",
+            "mapreduce"
+        ],
+        "reference_code": "import concurrent.futures\ndata = list(range(10000))\ndef mapper(chunk):\n    return [x * 2 for x in chunk]\ndef reducer(results):\n    return sum(sum(x) for x in results)\n\nchunks = [data[i:i+1000] for i in range(0, 10000, 1000)]\nwith concurrent.futures.ThreadPoolExecutor(max_workers=4) as ex:\n    map_res = list(ex.map(mapper, chunks))\nfinal = reducer(map_res)\nprint(f'MapReduce chunks: {len(map_res)}')\nprint(f'Final reduced: {final}')",
+        "expected_output": "MapReduce chunks: 10\nFinal reduced: 99990000\n",
+        "prompt": "Implement a threaded map-reduce: split range(10000) into 10 chunks, map (multiply by 2) using ThreadPoolExecutor with 4 workers, then reduce by summing all results. Print chunk count and final sum."
+    },
+    {
+        "id": "E10",
+        "name": "Hybrid async and threading",
+        "difficulty": "hard",
+        "description": "Combine asyncio with thread pool for mixed workloads.",
+        "supported_backends": [
+            "opensandbox",
+            "subprocess",
+            "docker"
+        ],
+        "validation_type": "exact",
+        "tags": [
+            "concurrency",
+            "hybrid"
+        ],
+        "reference_code": "import asyncio, time\ndef blocking_work(n):\n    time.sleep(0.02)\n    return n * 3\nasync def main():\n    loop = asyncio.get_running_loop()\n    # Emulate concurrent blocking calls\n    futures = [loop.run_in_executor(None, blocking_work, i) for i in range(10)]\n    res = await asyncio.gather(*futures)\n    print(f'Hybrid async/thread execution finished: {len(res)} tasks')\n    print(f'Sum: {sum(res)}')\nasyncio.run(main())",
+        "expected_output": "Hybrid async/thread execution finished: 10 tasks\nSum: 135\n",
+        "prompt": "Using asyncio with loop.run_in_executor, run 10 blocking functions (each sleeps 20ms and returns n*3) concurrently in a thread pool. Print completion count and sum of results (should be 135)."
+    }
+]

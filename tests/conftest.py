@@ -98,14 +98,14 @@ def live_llm_client(live_app_config):
 
 @pytest.fixture
 def live_llm_model_name(live_app_config):
-    """Model or deployment name from config. For Azure, use a chat-capable deployment when the configured one does not support chat completions."""
+    """Model or deployment name for live tests. For LiteLLM/Azure use 'azure/<deployment>' so the provider is recognized."""
     llm = live_app_config.llm
     if llm.provider == "azure_openai":
         name = (llm.azure_deployment_name or "").strip()
-        # Use a chat-capable deployment when the configured one does not support chat completions.
         if not name or "codex" in name.lower():
-            return os.environ.get("AZURE_OPENAI_CHAT_DEPLOYMENT", "gpt-5.2-chat")
-        return name
+            name = os.environ.get("AZURE_OPENAI_CHAT_DEPLOYMENT", "gpt-5.2-chat")
+        # LiteLLM requires the "azure/" prefix to route to Azure OpenAI
+        return name if name.startswith("azure/") else f"azure/{name}"
     return llm.model or "gpt-4o"
 
 

@@ -48,28 +48,22 @@ class TestRecursiveAgentIntegration:
         
         return agent
 
-    def test_infinite_context_search(self, agent, tmp_path, mock_llm_client):
-        """Test RLM infinite context search capability."""
+    @patch("client.recursive_agent.litellm.completion")
+    def test_infinite_context_search(self, mock_litellm_completion, agent, tmp_path, mock_llm_client):
+        """Test RLM infinite context search capability. ask_llm uses litellm.completion, so we mock that."""
         # 1. Prepare context file
         context_file = tmp_path / "large_log.txt"
         context_file.write_text("Log entry 1\nLog entry 2\nERROR: SYSTEM_FAILURE\nLog entry 4")
         
-        # 2. Mock LLM response for 'ask_llm'
-        # The agent will ask "Does this contain error?"
-        # We want the mock to return "Yes" for the chunk with "ERROR"
-        def side_effect(*args, **kwargs):
+        # 2. Mock litellm.completion (used by ask_llm callback)
+        def litellm_side_effect(*args, **kwargs):
             messages = kwargs.get("messages", [])
-            user_content = messages[-1]["content"]
+            user_content = messages[-1]["content"] if messages else ""
             if "SYSTEM_FAILURE" in user_content:
-                mock_response = MagicMock()
-                mock_response.choices = [MagicMock(message=MagicMock(content="Yes, found SYSTEM_FAILURE"))]
-                return mock_response
-            else:
-                mock_response = MagicMock()
-                mock_response.choices = [MagicMock(message=MagicMock(content="No error found"))]
-                return mock_response
-                
-        mock_llm_client.chat.completions.create.side_effect = side_effect
+                return MagicMock(choices=[MagicMock(message=MagicMock(content="Yes, found SYSTEM_FAILURE"))])
+            return MagicMock(choices=[MagicMock(message=MagicMock(content="No error found"))])
+        
+        mock_litellm_completion.side_effect = litellm_side_effect
         
         # 3. Execute Task
         task = "Find the error in CONTEXT_DATA"
@@ -134,22 +128,18 @@ print(f"Result: 50")
         assert result == ExecutionResult.SUCCESS
         assert "Result: 50" in output
 
-    def test_context_limit_comparison(self, agent, tmp_path, mock_llm_client):
+    @patch("client.recursive_agent.litellm.completion")
+    def test_context_limit_comparison(self, mock_litellm_completion, agent, tmp_path, mock_llm_client):
         """
         Verify RLM succeeds where standard approach fails due to context limits.
-        
-        Scenario:
-        - Input: 2KB file
-        - Constraint: LLM throws error if input > 500 bytes
-        - Standard: Reads all 2KB -> calls LLM -> FAILS
-        - RLM: Chunks into 100B -> calls LLM 20 times -> SUCCEEDS
+        ask_llm uses litellm.completion, so we mock that.
         """
         # 1. Prepare "large" file (2KB)
         large_content = "A" * 2000 + "SECRET_CODE"
         context_file = tmp_path / "huge_file.txt"
         context_file.write_text(large_content)
         
-        # 2. Mock LLM to enforce token/size limit
+        # 2. Mock litellm.completion to enforce size limit and return found/not found
         def limited_context_llm(*args, **kwargs):
             messages = kwargs.get("messages", [])
             full_prompt = " ".join([m["content"] for m in messages])
@@ -161,15 +151,13 @@ print(f"Result: 50")
                 return MagicMock(choices=[MagicMock(message=MagicMock(content="Found: SECRET_CODE"))])
             return MagicMock(choices=[MagicMock(message=MagicMock(content="Not found"))])
 
-        mock_llm_client.chat.completions.create.side_effect = limited_context_llm
+        mock_litellm_completion.side_effect = limited_context_llm
         
         # --- Part A: Simulate Standard Agent Behavior (Failure) ---
-        # A standard agent reads the whole file and asks the LLM
-        print("\\n[Test] Simulating Standard Agent...")
+        print("\n[Test] Simulating Standard Agent...")
         try:
             content = context_file.read_text()
-            # This call MUST fail
-            mock_llm_client.chat.completions.create(
+            mock_litellm_completion(
                 model="gpt-4",
                 messages=[{"role": "user", "content": f"Find code in: {content}"}]
             )

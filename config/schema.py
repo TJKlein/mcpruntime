@@ -50,7 +50,7 @@ class LLMConfig(BaseModel):
     model: str = Field(default="gpt-4o-mini", description="Model name to use")
     api_key: Optional[str] = Field(default=None, description="API key (or use OPENAI_API_KEY env var)")
     temperature: float = Field(default=0.3, description="Temperature for code generation")
-    max_tokens: int = Field(default=2000, description="Max tokens for code generation (legacy)")
+    max_tokens: int = Field(default=4000, description="Max tokens for code generation (legacy)")
     max_completion_tokens: Optional[int] = Field(default=None, description="Max completion tokens (for newer models)")
     # Azure OpenAI specific
     azure_endpoint: Optional[str] = Field(default=None, description="Azure OpenAI endpoint")

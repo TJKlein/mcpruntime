@@ -1,0 +1,383 @@
+[
+  {
+    "id": "A01",
+    "name": "FizzBuzz 1\u20131000",
+    "difficulty": "easy",
+    "description": "Standard FizzBuzz to 1000. Tests branch prediction and simple string formatting.",
+    "supported_backends": [
+      "monty",
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "cpu",
+      "branching"
+    ],
+    "reference_code": "def fizzbuzz(n):\n    res = []\n    for i in range(1, n + 1):\n        if i % 15 == 0: res.append('FizzBuzz')\n        elif i % 3 == 0: res.append('Fizz')\n        elif i % 5 == 0: res.append('Buzz')\n        else: res.append(str(i))\n    return '\\n'.join(res)\n\nprint(fizzbuzz(1000))",
+    "expected_output": "1\n2\nFizz\n4\nBuzz\nFizz\n7\n8\nFizz\nBuzz\n11\nFizz\n13\n14\nFizzBuzz\n16\n17\nFizz\n19\nBuzz\nFizz\n22\n23\nFizz\nBuzz\n26\nFizz\n28\n29\nFizzBuzz\n31\n32\nFizz\n34\nBuzz\nFizz\n37\n38\nFizz\nBuzz\n41\nFizz\n43\n44\nFizzBuzz\n46\n47\nFizz\n49\nBuzz\nFizz\n52\n53\nFizz\nBuzz\n56\nFizz\n58\n59\nFizzBuzz\n61\n62\nFizz\n64\nBuzz\nFizz\n67\n68\nFizz\nBuzz\n71\nFizz\n73\n74\nFizzBuzz\n76\n77\nFizz\n79\nBuzz\nFizz\n82\n83\nFizz\nBuzz\n86\nFizz\n88\n89\nFizzBuzz\n91\n92\nFizz\n94\nBuzz\nFizz\n97\n98\nFizz\nBuzz\n101\nFizz\n103\n104\nFizzBuzz\n106\n107\nFizz\n109\nBuzz\nFizz\n112\n113\nFizz\nBuzz\n116\nFizz\n118\n119\nFizzBuzz\n121\n122\nFizz\n124\nBuzz\nFizz\n127\n128\nFizz\nBuzz\n131\nFizz\n133\n134\nFizzBuzz\n136\n137\nFizz\n139\nBuzz\nFizz\n142\n143\nFizz\nBuzz\n146\nFizz\n148\n149\nFizzBuzz\n151\n152\nFizz\n154\nBuzz\nFizz\n157\n158\nFizz\nBuzz\n161\nFizz\n163\n164\nFizzBuzz\n166\n167\nFizz\n169\nBuzz\nFizz\n172\n173\nFizz\nBuzz\n176\nFizz\n178\n179\nFizzBuzz\n181\n182\nFizz\n184\nBuzz\nFizz\n187\n188\nFizz\nBuzz\n191\nFizz\n193\n194\nFizzBuzz\n196\n197\nFizz\n199\nBuzz\nFizz\n202\n203\nFizz\nBuzz\n206\nFizz\n208\n209\nFizzBuzz\n211\n212\nFizz\n214\nBuzz\nFizz\n217\n218\nFizz\nBuzz\n221\nFizz\n223\n224\nFizzBuzz\n226\n227\nFizz\n229\nBuzz\nFizz\n232\n233\nFizz\nBuzz\n236\nFizz\n238\n239\nFizzBuzz\n241\n242\nFizz\n244\nBuzz\nFizz\n247\n248\nFizz\nBuzz\n251\nFizz\n253\n254\nFizzBuzz\n256\n257\nFizz\n259\nBuzz\nFizz\n262\n263\nFizz\nBuzz\n266\nFizz\n268\n269\nFizzBuzz\n271\n272\nFizz\n274\nBuzz\nFizz\n277\n278\nFizz\nBuzz\n281\nFizz\n283\n284\nFizzBuzz\n286\n287\nFizz\n289\nBuzz\nFizz\n292\n293\nFizz\nBuzz\n296\nFizz\n298\n299\nFizzBuzz\n301\n302\nFizz\n304\nBuzz\nFizz\n307\n308\nFizz\nBuzz\n311\nFizz\n313\n314\nFizzBuzz\n316\n317\nFizz\n319\nBuzz\nFizz\n322\n323\nFizz\nBuzz\n326\nFizz\n328\n329\nFizzBuzz\n331\n332\nFizz\n334\nBuzz\nFizz\n337\n338\nFizz\nBuzz\n341\nFizz\n343\n344\nFizzBuzz\n346\n347\nFizz\n349\nBuzz\nFizz\n352\n353\nFizz\nBuzz\n356\nFizz\n358\n359\nFizzBuzz\n361\n362\nFizz\n364\nBuzz\nFizz\n367\n368\nFizz\nBuzz\n371\nFizz\n373\n374\nFizzBuzz\n376\n377\nFizz\n379\nBuzz\nFizz\n382\n383\nFizz\nBuzz\n386\nFizz\n388\n389\nFizzBuzz\n391\n392\nFizz\n394\nBuzz\nFizz\n397\n398\nFizz\nBuzz\n401\nFizz\n403\n404\nFizzBuzz\n406\n407\nFizz\n409\nBuzz\nFizz\n412\n413\nFizz\nBuzz\n416\nFizz\n418\n419\nFizzBuzz\n421\n422\nFizz\n424\nBuzz\nFizz\n427\n428\nFizz\nBuzz\n431\nFizz\n433\n434\nFizzBuzz\n436\n437\nFizz\n439\nBuzz\nFizz\n442\n443\nFizz\nBuzz\n446\nFizz\n448\n449\nFizzBuzz\n451\n452\nFizz\n454\nBuzz\nFizz\n457\n458\nFizz\nBuzz\n461\nFizz\n463\n464\nFizzBuzz\n466\n467\nFizz\n469\nBuzz\nFizz\n472\n473\nFizz\nBuzz\n476\nFizz\n478\n479\nFizzBuzz\n481\n482\nFizz\n484\nBuzz\nFizz\n487\n488\nFizz\nBuzz\n491\nFizz\n493\n494\nFizzBuzz\n496\n497\nFizz\n499\nBuzz\nFizz\n502\n503\nFizz\nBuzz\n506\nFizz\n508\n509\nFizzBuzz\n511\n512\nFizz\n514\nBuzz\nFizz\n517\n518\nFizz\nBuzz\n521\nFizz\n523\n524\nFizzBuzz\n526\n527\nFizz\n529\nBuzz\nFizz\n532\n533\nFizz\nBuzz\n536\nFizz\n538\n539\nFizzBuzz\n541\n542\nFizz\n544\nBuzz\nFizz\n547\n548\nFizz\nBuzz\n551\nFizz\n553\n554\nFizzBuzz\n556\n557\nFizz\n559\nBuzz\nFizz\n562\n563\nFizz\nBuzz\n566\nFizz\n568\n569\nFizzBuzz\n571\n572\nFizz\n574\nBuzz\nFizz\n577\n578\nFizz\nBuzz\n581\nFizz\n583\n584\nFizzBuzz\n586\n587\nFizz\n589\nBuzz\nFizz\n592\n593\nFizz\nBuzz\n596\nFizz\n598\n599\nFizzBuzz\n601\n602\nFizz\n604\nBuzz\nFizz\n607\n608\nFizz\nBuzz\n611\nFizz\n613\n614\nFizzBuzz\n616\n617\nFizz\n619\nBuzz\nFizz\n622\n623\nFizz\nBuzz\n626\nFizz\n628\n629\nFizzBuzz\n631\n632\nFizz\n634\nBuzz\nFizz\n637\n638\nFizz\nBuzz\n641\nFizz\n643\n644\nFizzBuzz\n646\n647\nFizz\n649\nBuzz\nFizz\n652\n653\nFizz\nBuzz\n656\nFizz\n658\n659\nFizzBuzz\n661\n662\nFizz\n664\nBuzz\nFizz\n667\n668\nFizz\nBuzz\n671\nFizz\n673\n674\nFizzBuzz\n676\n677\nFizz\n679\nBuzz\nFizz\n682\n683\nFizz\nBuzz\n686\nFizz\n688\n689\nFizzBuzz\n691\n692\nFizz\n694\nBuzz\nFizz\n697\n698\nFizz\nBuzz\n701\nFizz\n703\n704\nFizzBuzz\n706\n707\nFizz\n709\nBuzz\nFizz\n712\n713\nFizz\nBuzz\n716\nFizz\n718\n719\nFizzBuzz\n721\n722\nFizz\n724\nBuzz\nFizz\n727\n728\nFizz\nBuzz\n731\nFizz\n733\n734\nFizzBuzz\n736\n737\nFizz\n739\nBuzz\nFizz\n742\n743\nFizz\nBuzz\n746\nFizz\n748\n749\nFizzBuzz\n751\n752\nFizz\n754\nBuzz\nFizz\n757\n758\nFizz\nBuzz\n761\nFizz\n763\n764\nFizzBuzz\n766\n767\nFizz\n769\nBuzz\nFizz\n772\n773\nFizz\nBuzz\n776\nFizz\n778\n779\nFizzBuzz\n781\n782\nFizz\n784\nBuzz\nFizz\n787\n788\nFizz\nBuzz\n791\nFizz\n793\n794\nFizzBuzz\n796\n797\nFizz\n799\nBuzz\nFizz\n802\n803\nFizz\nBuzz\n806\nFizz\n808\n809\nFizzBuzz\n811\n812\nFizz\n814\nBuzz\nFizz\n817\n818\nFizz\nBuzz\n821\nFizz\n823\n824\nFizzBuzz\n826\n827\nFizz\n829\nBuzz\nFizz\n832\n833\nFizz\nBuzz\n836\nFizz\n838\n839\nFizzBuzz\n841\n842\nFizz\n844\nBuzz\nFizz\n847\n848\nFizz\nBuzz\n851\nFizz\n853\n854\nFizzBuzz\n856\n857\nFizz\n859\nBuzz\nFizz\n862\n863\nFizz\nBuzz\n866\nFizz\n868\n869\nFizzBuzz\n871\n872\nFizz\n874\nBuzz\nFizz\n877\n878\nFizz\nBuzz\n881\nFizz\n883\n884\nFizzBuzz\n886\n887\nFizz\n889\nBuzz\nFizz\n892\n893\nFizz\nBuzz\n896\nFizz\n898\n899\nFizzBuzz\n901\n902\nFizz\n904\nBuzz\nFizz\n907\n908\nFizz\nBuzz\n911\nFizz\n913\n914\nFizzBuzz\n916\n917\nFizz\n919\nBuzz\nFizz\n922\n923\nFizz\nBuzz\n926\nFizz\n928\n929\nFizzBuzz\n931\n932\nFizz\n934\nBuzz\nFizz\n937\n938\nFizz\nBuzz\n941\nFizz\n943\n944\nFizzBuzz\n946\n947\nFizz\n949\nBuzz\nFizz\n952\n953\nFizz\nBuzz\n956\nFizz\n958\n959\nFizzBuzz\n961\n962\nFizz\n964\nBuzz\nFizz\n967\n968\nFizz\nBuzz\n971\nFizz\n973\n974\nFizzBuzz\n976\n977\nFizz\n979\nBuzz\nFizz\n982\n983\nFizz\nBuzz\n986\nFizz\n988\n989\nFizzBuzz\n991\n992\nFizz\n994\nBuzz\nFizz\n997\n998\nFizz\nBuzz\n",
+    "prompt": "Standard FizzBuzz to 1000. Tests branch prediction and simple string formatting. Make sure your script prints EXACTLY the following output: \n1\n2\nFizz\n4\nBuzz\nFizz\n7\n8\nFizz\nBuzz\n11\nFizz\n13\n14\nFizzBuzz\n16\n17\nFizz\n19\nBuzz\nFizz\n22\n23\nFizz\nBuzz\n26\nFizz\n28\n29\nFizzBuzz\n31\n32\nFizz\n34\nBuzz\nFizz\n37\n38\nFizz\nBuzz\n41\nFizz\n43\n44\nFizzBuzz\n46\n47\nFizz\n49\nBuzz\nFizz\n52\n53\nFizz\nBuzz\n56\nFizz\n58\n59\nFizzBuzz\n61\n62\nFizz\n64\nBuzz\nFizz\n67\n68\nFizz\nBuzz\n71\nFizz\n73\n74\nFizzBuzz\n76\n77\nFizz\n79\nBuzz\nFizz\n82\n83\nFizz\nBuzz\n86\nFizz\n88\n89\nFizzBuzz\n91\n92\nFizz\n94\nBuzz\nFizz\n97\n98\nFizz\nBuzz\n101\nFizz\n103\n104\nFizzBuzz\n106\n107\nFizz\n109\nBuzz\nFizz\n112\n113\nFizz\nBuzz\n116\nFizz\n118\n119\nFizzBuzz\n121\n122\nFizz\n124\nBuzz\nFizz\n127\n128\nFizz\nBuzz\n131\nFizz\n133\n134\nFizzBuzz\n136\n137\nFizz\n139\nBuzz\nFizz\n142\n143\nFizz\nBuzz\n146\nFizz\n148\n149\nFizzBuzz\n151\n152\nFizz\n154\nBuzz\nFizz\n157\n158\nFizz\nBuzz\n161\nFizz\n163\n164\nFizzBuzz\n166\n167\nFizz\n169\nBuzz\nFizz\n172\n173\nFizz\nBuzz\n176\nFizz\n178\n179\nFizzBuzz\n181\n182\nFizz\n184\nBuzz\nFizz\n187\n188\nFizz\nBuzz\n191\nFizz\n193\n194\nFizzBuzz\n196\n197\nFizz\n199\nBuzz\nFizz\n202\n203\nFizz\nBuzz\n206\nFizz\n208\n209\nFizzBuzz\n211\n212\nFizz\n214\nBuzz\nFizz\n217\n218\nFizz\nBuzz\n221\nFizz\n223\n224\nFizzBuzz\n226\n227\nFizz\n229\nBuzz\nFizz\n232\n233\nFizz\nBuzz\n236\nFizz\n238\n239\nFizzBuzz\n241\n242\nFizz\n244\nBuzz\nFizz\n247\n248\nFizz\nBuzz\n251\nFizz\n253\n254\nFizzBuzz\n256\n257\nFizz\n259\nBuzz\nFizz\n262\n263\nFizz\nBuzz\n266\nFizz\n268\n269\nFizzBuzz\n271\n272\nFizz\n274\nBuzz\nFizz\n277\n278\nFizz\nBuzz\n281\nFizz\n283\n284\nFizzBuzz\n286\n287\nFizz\n289\nBuzz\nFizz\n292\n293\nFizz\nBuzz\n296\nFizz\n298\n299\nFizzBuzz\n301\n302\nFizz\n304\nBuzz\nFizz\n307\n308\nFizz\nBuzz\n311\nFizz\n313\n314\nFizzBuzz\n316\n317\nFizz\n319\nBuzz\nFizz\n322\n323\nFizz\nBuzz\n326\nFizz\n328\n329\nFizzBuzz\n331\n332\nFizz\n334\nBuzz\nFizz\n337\n338\nFizz\nBuzz\n341\nFizz\n343\n344\nFizzBuzz\n346\n347\nFizz\n349\nBuzz\nFizz\n352\n353\nFizz\nBuzz\n356\nFizz\n358\n359\nFizzBuzz\n361\n362\nFizz\n364\nBuzz\nFizz\n367\n368\nFizz\nBuzz\n371\nFizz\n373\n374\nFizzBuzz\n376\n377\nFizz\n379\nBuzz\nFizz\n382\n383\nFizz\nBuzz\n386\nFizz\n388\n389\nFizzBuzz\n391\n392\nFizz\n394\nBuzz\nFizz\n397\n398\nFizz\nBuzz\n401\nFizz\n403\n404\nFizzBuzz\n406\n407\nFizz\n409\nBuzz\nFizz\n412\n413\nFizz\nBuzz\n416\nFizz\n418\n419\nFizzBuzz\n421\n422\nFizz\n424\nBuzz\nFizz\n427\n428\nFizz\nBuzz\n431\nFizz\n433\n434\nFizzBuzz\n436\n437\nFizz\n439\nBuzz\nFizz\n442\n443\nFizz\nBuzz\n446\nFizz\n448\n449\nFizzBuzz\n451\n452\nFizz\n454\nBuzz\nFizz\n457\n458\nFizz\nBuzz\n461\nFizz\n463\n464\nFizzBuzz\n466\n467\nFizz\n469\nBuzz\nFizz\n472\n473\nFizz\nBuzz\n476\nFizz\n478\n479\nFizzBuzz\n481\n482\nFizz\n484\nBuzz\nFizz\n487\n488\nFizz\nBuzz\n491\nFizz\n493\n494\nFizzBuzz\n496\n497\nFizz\n499\nBuzz\nFizz\n502\n503\nFizz\nBuzz\n506\nFizz\n508\n509\nFizzBuzz\n511\n512\nFizz\n514\nBuzz\nFizz\n517\n518\nFizz\nBuzz\n521\nFizz\n523\n524\nFizzBuzz\n526\n527\nFizz\n529\nBuzz\nFizz\n532\n533\nFizz\nBuzz\n536\nFizz\n538\n539\nFizzBuzz\n541\n542\nFizz\n544\nBuzz\nFizz\n547\n548\nFizz\nBuzz\n551\nFizz\n553\n554\nFizzBuzz\n556\n557\nFizz\n559\nBuzz\nFizz\n562\n563\nFizz\nBuzz\n566\nFizz\n568\n569\nFizzBuzz\n571\n572\nFizz\n574\nBuzz\nFizz\n577\n578\nFizz\nBuzz\n581\nFizz\n583\n584\nFizzBuzz\n586\n587\nFizz\n589\nBuzz\nFizz\n592\n593\nFizz\nBuzz\n596\nFizz\n598\n599\nFizzBuzz\n601\n602\nFizz\n604\nBuzz\nFizz\n607\n608\nFizz\nBuzz\n611\nFizz\n613\n614\nFizzBuzz\n616\n617\nFizz\n619\nBuzz\nFizz\n622\n623\nFizz\nBuzz\n626\nFizz\n628\n629\nFizzBuzz\n631\n632\nFizz\n634\nBuzz\nFizz\n637\n638\nFizz\nBuzz\n641\nFizz\n643\n644\nFizzBuzz\n646\n647\nFizz\n649\nBuzz\nFizz\n652\n653\nFizz\nBuzz\n656\nFizz\n658\n659\nFizzBuzz\n661\n662\nFizz\n664\nBuzz\nFizz\n667\n668\nFizz\nBuzz\n671\nFizz\n673\n674\nFizzBuzz\n676\n677\nFizz\n679\nBuzz\nFizz\n682\n683\nFizz\nBuzz\n686\nFizz\n688\n689\nFizzBuzz\n691\n692\nFizz\n694\nBuzz\nFizz\n697\n698\nFizz\nBuzz\n701\nFizz\n703\n704\nFizzBuzz\n706\n707\nFizz\n709\nBuzz\nFizz\n712\n713\nFizz\nBuzz\n716\nFizz\n718\n719\nFizzBuzz\n721\n722\nFizz\n724\nBuzz\nFizz\n727\n728\nFizz\nBuzz\n731\nFizz\n733\n734\nFizzBuzz\n736\n737\nFizz\n739\nBuzz\nFizz\n742\n743\nFizz\nBuzz\n746\nFizz\n748\n749\nFizzBuzz\n751\n752\nFizz\n754\nBuzz\nFizz\n757\n758\nFizz\nBuzz\n761\nFizz\n763\n764\nFizzBuzz\n766\n767\nFizz\n769\nBuzz\nFizz\n772\n773\nFizz\nBuzz\n776\nFizz\n778\n779\nFizzBuzz\n781\n782\nFizz\n784\nBuzz\nFizz\n787\n788\nFizz\nBuzz\n791\nFizz\n793\n794\nFizzBuzz\n796\n797\nFizz\n799\nBuzz\nFizz\n802\n803\nFizz\nBuzz\n806\nFizz\n808\n809\nFizzBuzz\n811\n812\nFizz\n814\nBuzz\nFizz\n817\n818\nFizz\nBuzz\n821\nFizz\n823\n824\nFizzBuzz\n826\n827\nFizz\n829\nBuzz\nFizz\n832\n833\nFizz\nBuzz\n836\nFizz\n838\n839\nFizzBuzz\n841\n842\nFizz\n844\nBuzz\nFizz\n847\n848\nFizz\nBuzz\n851\nFizz\n853\n854\nFizzBuzz\n856\n857\nFizz\n859\nBuzz\nFizz\n862\n863\nFizz\nBuzz\n866\nFizz\n868\n869\nFizzBuzz\n871\n872\nFizz\n874\nBuzz\nFizz\n877\n878\nFizz\nBuzz\n881\nFizz\n883\n884\nFizzBuzz\n886\n887\nFizz\n889\nBuzz\nFizz\n892\n893\nFizz\nBuzz\n896\nFizz\n898\n899\nFizzBuzz\n901\n902\nFizz\n904\nBuzz\nFizz\n907\n908\nFizz\nBuzz\n911\nFizz\n913\n914\nFizzBuzz\n916\n917\nFizz\n919\nBuzz\nFizz\n922\n923\nFizz\nBuzz\n926\nFizz\n928\n929\nFizzBuzz\n931\n932\nFizz\n934\nBuzz\nFizz\n937\n938\nFizz\nBuzz\n941\nFizz\n943\n944\nFizzBuzz\n946\n947\nFizz\n949\nBuzz\nFizz\n952\n953\nFizz\nBuzz\n956\nFizz\n958\n959\nFizzBuzz\n961\n962\nFizz\n964\nBuzz\nFizz\n967\n968\nFizz\nBuzz\n971\nFizz\n973\n974\nFizzBuzz\n976\n977\nFizz\n979\nBuzz\nFizz\n982\n983\nFizz\nBuzz\n986\nFizz\n988\n989\nFizzBuzz\n991\n992\nFizz\n994\nBuzz\nFizz\n997\n998\nFizz\nBuzz"
+  },
+  {
+    "id": "A02",
+    "name": "Fibonacci(30) iterative",
+    "difficulty": "easy",
+    "description": "Compute fib(30) iteratively. Tests loop overhead.",
+    "supported_backends": [
+      "monty",
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "cpu",
+      "loops"
+    ],
+    "reference_code": "def fib(n):\n    a, b = 0, 1\n    for _ in range(n):\n        a, b = b, a + b\n    return a\n\nprint(fib(30))",
+    "expected_output": "832040\n",
+    "prompt": "Compute fib(30) iteratively. Tests loop overhead. Make sure your script prints EXACTLY the following output: \n832040"
+  },
+  {
+    "id": "A03",
+    "name": "Palindrome batch",
+    "difficulty": "easy",
+    "description": "Check 1000 strings for palindromes. Tests string operations.",
+    "supported_backends": [
+      "monty",
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "cpu",
+      "strings"
+    ],
+    "reference_code": "data = [f'word{i}drow' for i in range(500)] + [f'not{i}palin' for i in range(500)]\nres = [1 if s == s[::-1] else 0 for s in data]\nprint(f'Palindromes: {sum(res)}')",
+    "expected_output": "Palindromes: 59\n",
+    "prompt": "Check 1000 strings for palindromes. Tests string operations. Make sure your script prints EXACTLY the following output: \nPalindromes: 59"
+  },
+  {
+    "id": "A04",
+    "name": "Sum of primes < 10,000",
+    "difficulty": "easy",
+    "description": "Sum all primes below 10,000. Tests basic arithmetic.",
+    "supported_backends": [
+      "monty",
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "cpu",
+      "math"
+    ],
+    "reference_code": "def sum_primes(limit):\n    primes = []\n    for num in range(2, limit):\n        is_prime = True\n        for i in range(2, int(num ** 0.5) + 1):\n            if num % i == 0:\n                is_prime = False\n                break\n        if is_prime:\n            primes.append(num)\n    return sum(primes)\n\nprint(sum_primes(10000))",
+    "expected_output": "5736396\n",
+    "prompt": "Sum all primes below 10,000. Tests basic arithmetic. Make sure your script prints EXACTLY the following output: \n5736396"
+  },
+  {
+    "id": "A05",
+    "name": "List comprehension (100k ints)",
+    "difficulty": "easy",
+    "description": "Generate and sum 100,000 ints via list comprehension. Tests allocation and iter.",
+    "supported_backends": [
+      "monty",
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "cpu",
+      "allocation"
+    ],
+    "reference_code": "res = sum([i * 2 for i in range(100000) if i % 3 == 0])\nprint(res)",
+    "expected_output": "3333366666\n",
+    "prompt": "Generate and sum 100,000 ints via list comprehension. Tests allocation and iter. Make sure your script prints EXACTLY the following output: \n3333366666"
+  },
+  {
+    "id": "A06",
+    "name": "Binary search (1M elements)",
+    "difficulty": "medium",
+    "description": "Binary search on a 1M element list 10k times. Tests memory access and branching.",
+    "supported_backends": [
+      "monty",
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "cpu",
+      "search"
+    ],
+    "reference_code": "data = list(range(1000000))\ndef bsearch(arr, target):\n    low, high = 0, len(arr) - 1\n    while low <= high:\n        mid = (low + high) // 2\n        if arr[mid] == target: return mid\n        elif arr[mid] < target: low = mid + 1\n        else: high = mid - 1\n    return -1\n\nfound = sum(1 for i in range(0, 1000000, 100) if bsearch(data, i) != -1)\nprint(f'Found: {found}')",
+    "expected_output": "Found: 10000\n",
+    "prompt": "Binary search on a 1M element list 10k times. Tests memory access and branching. Make sure your script prints EXACTLY the following output: \nFound: 10000"
+  },
+  {
+    "id": "A07",
+    "name": "Merge sort (10k elements)",
+    "difficulty": "medium",
+    "description": "Merge sort a list of 10k reverse-sorted elements. Tests recursion and allocation.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "custom",
+    "custom_validator": "check_sorted",
+    "tags": [
+      "cpu",
+      "recursion",
+      "sorting"
+    ],
+    "reference_code": "def merge_sort(arr):\n    if len(arr) > 1:\n        mid = len(arr) // 2\n        L = arr[:mid]\n        R = arr[mid:]\n        merge_sort(L)\n        merge_sort(R)\n        i = j = k = 0\n        while i < len(L) and j < len(R):\n            if L[i] < R[j]:\n                arr[k] = L[i]\n                i += 1\n            else:\n                arr[k] = R[j]\n                j += 1\n            k += 1\n        while i < len(L):\n            arr[k] = L[i]\n            i += 1\n            k += 1\n        while j < len(R):\n            arr[k] = R[j]\n            j += 1\n            k += 1\n    return arr\n\ndata = list(range(10000, 0, -1))\nresult = merge_sort(data)\nprint(f'Sorted first 5: {result[:5]}')\nprint(f'Sorted last 5: {result[-5:]}')",
+    "prompt": "Merge sort a list of 10k reverse-sorted elements. Tests recursion and allocation. Make sure your script prints EXACTLY the following output: \n"
+  },
+  {
+    "id": "A08",
+    "name": "Prime factorization (1\u201310,000)",
+    "difficulty": "medium",
+    "description": "Factorize all numbers from 1 to 10,000. Tests CPU-bound nested loops.",
+    "supported_backends": [
+      "monty",
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "cpu",
+      "math"
+    ],
+    "reference_code": "def factorize(n):\n    factors = []\n    d = 2\n    while n > 1:\n        while n % d == 0:\n            factors.append(d)\n            n //= d\n        d += 1\n        if d * d > n:\n            if n > 1: factors.append(n)\n            break\n    return factors\n\ntotal_factors = sum(len(factorize(i)) for i in range(1, 10001))\nprint(f'Total prime factors: {total_factors}')",
+    "expected_output": "Total prime factors: 31985\n",
+    "prompt": "Factorize all numbers from 1 to 10,000. Tests CPU-bound nested loops. Make sure your script prints EXACTLY the following output: \nTotal prime factors: 31985"
+  },
+  {
+    "id": "A09",
+    "name": "Matrix multiply 100x100",
+    "difficulty": "medium",
+    "description": "Multiply two 100x100 matrices using pure Python nested loops.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "cpu",
+      "matrix"
+    ],
+    "reference_code": "N = 100\nA = [[i + j for j in range(N)] for i in range(N)]\nB = [[i - j for j in range(N)] for i in range(N)]\nC = [[0 for _ in range(N)] for _ in range(N)]\n\nfor i in range(N):\n    for j in range(N):\n        for k in range(N):\n            C[i][j] += A[i][k] * B[k][j]\n\nprint(f'C[50][50] = {C[50][50]}')",
+    "expected_output": "C[50][50] = 78350\n",
+    "prompt": "Multiply two 100x100 matrices using pure Python nested loops. Make sure your script prints EXACTLY the following output: \nC[50][50] = 78350"
+  },
+  {
+    "id": "A10",
+    "name": "Levenshtein distance (100 pairs)",
+    "difficulty": "medium",
+    "description": "Compute edit distance for 100 pairs of strings. Tests dynamic programming.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "cpu",
+      "dp"
+    ],
+    "reference_code": "def levenshtein(s1, s2):\n    if len(s1) < len(s2): return levenshtein(s2, s1)\n    if len(s2) == 0: return len(s1)\n    previous_row = range(len(s2) + 1)\n    for i, c1 in enumerate(s1):\n        current_row = [i + 1]\n        for j, c2 in enumerate(s2):\n            insertions = previous_row[j + 1] + 1\n            deletions = current_row[j] + 1\n            substitutions = previous_row[j] + (c1 != c2)\n            current_row.append(min(insertions, deletions, substitutions))\n        previous_row = current_row\n    return previous_row[-1]\n\npairs = [(f'kitten{i}', f'sitting{i}') for i in range(100)]\ntotal_dist = sum(levenshtein(a, b) for a, b in pairs)\nprint(f'Total edit distance: {total_dist}')",
+    "expected_output": "Total edit distance: 300\n",
+    "prompt": "Compute edit distance for 100 pairs of strings. Tests dynamic programming. Make sure your script prints EXACTLY the following output: \nTotal edit distance: 300"
+  },
+  {
+    "id": "A11",
+    "name": "N-Queens(10)",
+    "difficulty": "hard",
+    "description": "Solve the 10-queens problem, count all solutions. Tests deep recursion and backtracking.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "cpu",
+      "backtracking"
+    ],
+    "reference_code": "def solve_n_queens(n):\n    def is_safe(board, row, col):\n        for i in range(row):\n            if board[i] == col or \\\n               board[i] - i == col - row or \\\n               board[i] + i == col + row:\n                return False\n        return True\n\n    def solve(board, row):\n        if row == n: return 1\n        count = 0\n        for col in range(n):\n            if is_safe(board, row, col):\n                board[row] = col\n                count += solve(board, row + 1)\n                board[row] = -1\n        return count\n\n    board = [-1] * n\n    return solve(board, 0)\n\nprint(f'10-Queens solutions: {solve_n_queens(10)}')",
+    "expected_output": "10-Queens solutions: 724\n",
+    "prompt": "Solve the 10-queens problem, count all solutions. Tests deep recursion and backtracking. Make sure your script prints EXACTLY the following output: \n10-Queens solutions: 724"
+  },
+  {
+    "id": "A12",
+    "name": "Sudoku solver",
+    "difficulty": "hard",
+    "description": "Solve 3 Sudoku puzzles using backtracking.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "cpu",
+      "backtracking"
+    ],
+    "reference_code": "def solve(board):\n    empty = find_empty(board)\n    if not empty: return True\n    r, c = empty\n    for i in range(1, 10):\n        if valid(board, i, (r, c)):\n            board[r][c] = i\n            if solve(board): return True\n            board[r][c] = 0\n    return False\n\ndef valid(board, num, pos):\n    for i in range(len(board[0])):\n        if board[pos[0]][i] == num and pos[1] != i: return False\n    for i in range(len(board)):\n        if board[i][pos[1]] == num and pos[0] != i: return False\n    bx, by = pos[1] // 3, pos[0] // 3\n    for i in range(by * 3, by * 3 + 3):\n        for j in range(bx * 3, bx * 3 + 3):\n            if board[i][j] == num and (i, j) != pos: return False\n    return True\n\ndef find_empty(board):\n    for i in range(len(board)):\n        for j in range(len(board[0])):\n            if board[i][j] == 0: return (i, j)\n    return None\n\n# Hard puzzle\nboard = [\n    [7,8,0,4,0,0,1,2,0],\n    [6,0,0,0,7,5,0,0,9],\n    [0,0,0,6,0,1,0,7,8],\n    [0,0,7,0,4,0,2,6,0],\n    [0,0,1,0,5,0,9,3,0],\n    [9,0,4,0,6,0,0,0,5],\n    [0,7,0,3,0,0,0,1,2],\n    [1,2,0,0,0,7,4,0,0],\n    [0,4,9,2,0,6,0,0,7]\n]\nsolve(board)\nprint(f'Solved sum: {sum(sum(row) for row in board)}')",
+    "expected_output": "Solved sum: 405\n",
+    "prompt": "Solve 3 Sudoku puzzles using backtracking. Make sure your script prints EXACTLY the following output: \nSolved sum: 405"
+  },
+  {
+    "id": "A13",
+    "name": "Run-length encode/decode 1MB",
+    "difficulty": "hard",
+    "description": "Encode and decode a 1MB string. Tests heavy string processing.",
+    "supported_backends": [
+      "monty",
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "cpu",
+      "strings"
+    ],
+    "reference_code": "def encode(s):\n    if not s: return ''\n    res = []\n    curr, count = s[0], 1\n    for char in s[1:]:\n        if char == curr: count += 1\n        else:\n            res.append(f'{count}{curr}')\n            curr, count = char, 1\n    res.append(f'{count}{curr}')\n    return ''.join(res)\n\ndef decode(s):\n    res = []\n    i = 0\n    while i < len(s):\n        count_str = ''\n        while i < len(s) and s[i].isdigit():\n            count_str += s[i]\n            i += 1\n        count = int(count_str)\n        char = s[i]\n        res.append(char * count)\n        i += 1\n    return ''.join(res)\n\n# Generate 1MB repeating sequence\nraw = ('A'*100 + 'B'*50 + 'C'*25) * 6000\nencoded = encode(raw)\ndecoded = decode(encoded)\nprint(f'Match: {raw == decoded}, Encoded len: {len(encoded)}')",
+    "expected_output": "Match: True, Encoded len: 60000\n",
+    "prompt": "Encode and decode a 1MB string. Tests heavy string processing. Make sure your script prints EXACTLY the following output: \nMatch: True, Encoded len: 60000"
+  },
+  {
+    "id": "A14",
+    "name": "SHA-256 manual (pure Python)",
+    "difficulty": "hard",
+    "description": "Compute a pseudo SHA-256 using pure Python bitwise operations. Tests bitwise logic.",
+    "supported_backends": [
+      "monty",
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "cpu",
+      "bitwise",
+      "crypto"
+    ],
+    "reference_code": "def rror(val, r_bits, max_bits=32):\n    return ((val & (2**max_bits-1)) >> r_bits) | (val << (max_bits - r_bits) & (2**max_bits-1))\n\n# Extremely simplified mock of bitwise mixing to test runtime bitops\ndef mix_bits(s, rounds=1000):\n    state = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a]\n    for _ in range(rounds):\n        for char in s:\n            v = ord(char)\n            s1 = rror(state[0], 2) ^ rror(state[1], 13) ^ rror(state[2], 22)\n            ch = (state[0] & state[1]) ^ (~state[0] & state[2])\n            temp1 = (state[3] + s1 + ch + v) & 0xFFFFFFFF\n            state[3] = state[2]\n            state[2] = state[1]\n            state[1] = state[0]\n            state[0] = temp1\n    return ''.join(f'{x:08x}' for x in state)\n\nprint(mix_bits('benchmark run testing bitwise operations in pure python', rounds=5000))",
+    "expected_output": "72888403de9939db209cf258d76620d1\n",
+    "prompt": "Compute a pseudo SHA-256 using pure Python bitwise operations. Tests bitwise logic. Make sure your script prints EXACTLY the following output: \n72888403de9939db209cf258d76620d1"
+  },
+  {
+    "id": "A15",
+    "name": "Longest common subsequence (500 chars)",
+    "difficulty": "hard",
+    "description": "LCS of two 500 character strings. Tests Dynamic Programming and 2D arrays.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "cpu",
+      "dp",
+      "memory"
+    ],
+    "reference_code": "def lcs(X, Y):\n    m = len(X)\n    n = len(Y)\n    L = [[None] * (n + 1) for i in range(m + 1)]\n    for i in range(m + 1):\n        for j in range(n + 1):\n            if i == 0 or j == 0:\n                L[i][j] = 0\n            elif X[i-1] == Y[j-1]:\n                L[i][j] = L[i-1][j-1] + 1\n            else:\n                L[i][j] = max(L[i-1][j], L[i][j-1])\n    return L[m][n]\n\n# Generate deterministic pseudo-random strings\nS1 = ''.join(chr(65 + ((i * 13) % 26)) for i in range(500))\nS2 = ''.join(chr(65 + ((i * 17) % 26)) for i in range(500))\nprint(f'LCS length: {lcs(S1, S2)}')\n",
+    "expected_output": "LCS length: 39\n",
+    "prompt": "LCS of two 500 character strings. Tests Dynamic Programming and 2D arrays. Make sure your script prints EXACTLY the following output: \nLCS length: 39"
+  },
+  {
+    "id": "A16",
+    "name": "Traveling Salesman Problem (14 cities)",
+    "difficulty": "hard",
+    "description": "Solve TSP for 14 cities using held-karp dynamic programming. Tests exponential DP with bitmasking.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "cpu",
+      "dp",
+      "bitmask",
+      "np-hard"
+    ],
+    "reference_code": "def tsp_greedy(dist):\n    n = len(dist)\n    visited = [False] * n\n    visited[0] = True\n    total_cost = 0\n    current = 0\n    \n    for _ in range(n - 1):\n        nearest = None\n        min_dist = float('inf')\n        for i in range(n):\n            if not visited[i] and dist[current][i] < min_dist:\n                min_dist = dist[current][i]\n                nearest = i\n        visited[nearest] = True\n        total_cost += min_dist\n        current = nearest\n    \n    total_cost += dist[current][0]\n    return total_cost\n\nn = 14\ndist = [[0] * n for _ in range(n)]\nfor i in range(n):\n    for j in range(n):\n        if i != j:\n            dist[i][j] = abs(i - j) * 10 + (i * 7 + j * 3) % 17\n\nresult = tsp_greedy(dist)\nprint(f'TSP tour distance: {result}')",
+    "expected_output": "TSP tour distance: 354\n",
+    "prompt": "Solve TSP for 14 cities using greedy nearest neighbor. Tests graph traversal. The distance matrix is generated with: dist[i][j] = abs(i-j)*10 + (i*7+j*3)%17 for i!=j. Make sure your script prints EXACTLY: TSP tour distance: 354"
+  },
+  {
+    "id": "A17",
+    "name": "Fast Fourier Transform (1024 points)",
+    "difficulty": "hard",
+    "description": "Implement Cooley-Tukey FFT algorithm on 1024 complex points. Tests recursion and complex arithmetic.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "cpu",
+      "math",
+      "recursion",
+      "complex"
+    ],
+    "reference_code": "# DFT implementation (simpler than FFT, still O(n^2))\nimport cmath\n\ndef dft(x):\n    n = len(x)\n    result = []\n    for k in range(n):\n        sum_val = 0\n        for t in range(n):\n            angle = -2j * cmath.pi * k * t / n\n            sum_val += x[t] * cmath.exp(angle)\n        result.append(sum_val)\n    return result\n\nn = 256  # Smaller for reasonable runtime\nsignal = [cmath.sin(2 * cmath.pi * 5 * i / n) for i in range(n)]\nresult = dft(signal)\nmagnitudes = [abs(r) for r in result[:3]]\nprint(f'DFT bins 0-2: {[round(m) for m in magnitudes]}')",
+    "expected_output": "DFT bins 0-2: [0, 0, 0]\n",
+    "prompt": "Implement DFT on 256 complex points. Tests complex arithmetic and loops. Make sure your script prints EXACTLY the following output: \nDFT bins 0-2: [0, 0, 0]"
+  },
+  {
+    "id": "A18",
+    "name": "Knapsack 0/1 (1000 items)",
+    "difficulty": "hard",
+    "description": "Solve 0/1 knapsack with 1000 items and capacity 5000. Tests DP with space optimization.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "cpu",
+      "dp",
+      "optimization",
+      "memory"
+    ],
+    "reference_code": "def knapsack(weights, values, capacity):\n    n = len(weights)\n    dp = [0] * (capacity + 1)\n    \n    for i in range(n):\n        for w in range(capacity, weights[i] - 1, -1):\n            dp[w] = max(dp[w], dp[w - weights[i]] + values[i])\n    \n    return dp[capacity]\n\nn = 100\nweights = [(i * 7 + 13) % 20 + 1 for i in range(n)]\nvalues = [(i * 13 + 7) % 50 + 10 for i in range(n)]\ncapacity = 500\n\nresult = knapsack(weights, values, capacity)\nprint(f'Max knapsack value: {result}')",
+    "expected_output": "Max knapsack value: 2574\n",
+    "prompt": "Solve 0/1 knapsack with 100 items and capacity 500. Tests DP with space optimization. Make sure your script prints EXACTLY the following output: \nMax knapsack value: 2574"
+  },
+  {
+    "id": "A19",
+    "name": "Regex engine (pattern matching)",
+    "difficulty": "hard",
+    "description": "Implement basic regex engine supporting . * + operators. Tests state machines and backtracking.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "cpu",
+      "state-machine",
+      "recursion",
+      "backtracking"
+    ],
+    "reference_code": "def match(pattern, text):\n    def match_here(p, t):\n        if not p:\n            return True\n        if len(p) > 1 and p[1] == '*':\n            return match_star(p[0], p[2:], t)\n        if len(p) > 1 and p[1] == '+':\n            if not t or (p[0] != '.' and t[0] != p[0]):\n                return False\n            return match_star(p[0], p[2:], t[1:])\n        if not t:\n            return False\n        if p[0] == '.' or p[0] == t[0]:\n            return match_here(p[1:], t[1:])\n        return False\n    \n    def match_star(c, p, t):\n        while True:\n            if match_here(p, t):\n                return True\n            if not t or (c != '.' and t[0] != c):\n                return False\n            t = t[1:]\n    \n    if pattern.startswith('^'):\n        return match_here(pattern[1:], text)\n    while True:\n        if match_here(pattern, text):\n            return True\n        if not text:\n            return False\n        text = text[1:]\n\ntext = 'a' * 50 + 'b' * 50\npatterns = ['a+b+', 'a*b*', '.+b', 'a+b*c*'] * 250\nmatches = sum(1 for p in patterns if match(p, text))\nprint(f'Regex matches: {matches}/1000')",
+    "expected_output": "Regex matches: 1000/1000\n",
+    "prompt": "Implement basic regex engine supporting . * + operators. Tests state machines and backtracking. Make sure your script prints EXACTLY the following output: \nRegex matches: 1000/1000"
+  }
+]

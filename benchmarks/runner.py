@@ -1,0 +1,389 @@
+"""Benchmark execution harness."""
+
+import json
+import logging
+import os
+import time
+from pathlib import Path
+from typing import Dict, List, Optional, Any
+
+from config.loader import load_config
+from config.schema import ExecutionConfig
+from client.base import ExecutionResult
+from client.filesystem_helpers import FilesystemHelper
+from client.monty_executor import MontyExecutor
+from client.opensandbox_executor import OpenSandboxExecutor
+
+from .tasks.schema import Task, TaskResult
+from .validators import Validator
+
+logger = logging.getLogger(__name__)
+
+
+class BenchmarkRunner:
+    """Runs benchmark tasks across configured backends."""
+    
+    def __init__(self, backend: str, n_runs: int = 5, cold_start: bool = True, llm_config=None):
+        """Initialize runner.
+        
+        Args:
+            backend: Sandbox backend ("docker", "monty", "opensandbox")
+            n_runs: Number of times to run each task (for statistical variance)
+            cold_start: Whether to create a fresh sandbox for each run
+            llm_config: Optional LLM configuration for agentic evaluation
+        """
+        self.backend = backend.lower()
+        self.n_runs = n_runs
+        self.cold_start = cold_start
+        self.config = load_config(Path(__file__).parent.parent / "config.yaml")
+        self.llm_config = llm_config
+        
+        # Setup helpers (keeping this as it's used elsewhere)
+        self.fs_helper = FilesystemHelper(
+            workspace_dir=self.config.execution.workspace_dir,
+            servers_dir=self.config.execution.servers_dir,
+            skills_dir=self.config.execution.skills_dir,
+        )
+        
+        # We don't instantiate the executor here if cold_start=True
+        # We'll instantiate it per task/run
+        self._shared_executor = None
+        if not self.cold_start:
+            self._shared_executor = self._create_executor()
+            
+        # Initialize CodeGenerator if running dynamic evaluation
+        self.code_generator = None
+        if self.llm_config and self.llm_config.enabled:
+            from client.code_generator import CodeGenerator
+            self.code_generator = CodeGenerator(llm_config=self.llm_config, tool_descriptions={})
+
+    def _create_executor(self):
+        """Create a fresh executor instance."""
+        if self.backend == "monty":
+            executor = MontyExecutor(
+                execution_config=self.config.execution,
+                guardrail_config=self.config.guardrails,
+                optimization_config=self.config.optimizations,
+            )
+        elif self.backend == "subprocess":
+            from benchmarks.baselines import SubprocessBaseline
+            executor = SubprocessBaseline(execution_config=self.config.execution, guardrail_config=self.config.guardrails, optimization_config=self.config.optimizations)
+        elif self.backend == "docker":
+            from benchmarks.baselines import DockerBaseline
+            executor = DockerBaseline(execution_config=self.config.execution, guardrail_config=self.config.guardrails, optimization_config=self.config.optimizations)
+        else:
+            executor = OpenSandboxExecutor(
+                execution_config=self.config.execution,
+                guardrail_config=self.config.guardrails,
+                optimization_config=self.config.optimizations,
+            )
+        return executor
+        
+    def load_tasks(
+        self, 
+        categories: Optional[List[str]] = None, 
+        difficulties: Optional[List[str]] = None,
+        tags: Optional[List[str]] = None
+    ) -> List[Task]:
+        """Load tasks from JSON definition files."""
+        tasks = []
+        tasks_dir = Path(__file__).parent / "tasks"
+        
+        for category_dir in tasks_dir.iterdir():
+            if not category_dir.is_dir() or category_dir.name.startswith("__"):
+                continue
+                
+            if categories and category_dir.name not in categories:
+                continue
+                
+            tasks_file = category_dir / "tasks.json"
+            if not tasks_file.exists():
+                continue
+                
+            try:
+                with open(tasks_file, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    for item in data:
+                        # Add category if missing
+                        if "category" not in item:
+                            item["category"] = category_dir.name
+                            
+                        task = Task.from_dict(item)
+                        
+                        # Filter by difficulty
+                        if difficulties and task.difficulty not in difficulties:
+                            continue
+                            
+                        # Filter by tags
+                        if tags and not any(tag in task.tags for tag in tags):
+                            continue
+                            
+                        tasks.append(task)
+            except Exception as e:
+                logger.error(f"Failed to parse {tasks_file}: {e}")
+                
+        return sorted(tasks, key=lambda t: (t.category, t.difficulty, t.id))
+
+    def _benchmark_project_root(self) -> Path:
+        """Project root for benchmark (same resolution as executor when run from repo)."""
+        root = Path(__file__).resolve().parent.parent
+        # Match executor: workspace is relative to project root
+        return root
+
+    def setup_workspace(self, task: Task) -> None:
+        """Create setup files in the workspace directory."""
+        # Resolve workspace relative to project root so it matches executor (opensandbox)
+        root = self._benchmark_project_root()
+        workspace = (root / self.config.execution.workspace_dir.lstrip("./")).resolve()
+        
+        # Clean existing workspace task files only - preserve executor directories (client, servers, skills)
+        # The executor writes these files; we should not delete them between tasks
+        if workspace.exists() and workspace.is_dir():
+            for item in workspace.iterdir():
+                # Skip hidden dirs, .mcp, .replay, and executor-required directories
+                if item.name in [".mcp", ".replay", "client", "servers", "skills"] or item.name.startswith("."):
+                    continue
+                # Also skip directories that might be volume mounts
+                if item.is_dir() and item.name in ["data", "output", "logs", "temp", "tmp"]:
+                    continue
+                if item.is_file():
+                    item.unlink()
+                elif item.is_dir():
+                    import shutil
+                    shutil.rmtree(item)
+        
+        # Create setup files
+        for file_def in task.setup_files:
+            if "path" not in file_def or ("content" not in file_def and "source" not in file_def):
+                continue
+                
+            path = file_def["path"]
+            # Ensure safe path within workspace
+            safe_path = (workspace / path.lstrip("/")).resolve()
+            if not str(safe_path).startswith(str(workspace)):
+                logger.error(f"Skipping unsafe setup path: {path}")
+                continue
+                
+            safe_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            # Use provided content or copy from source fixture
+            if "content" in file_def:
+                safe_path.write_text(file_def["content"], encoding="utf-8")
+            elif "source" in file_def:
+                fixture_path = Path(__file__).parent / "tasks" / task.category / "fixtures" / file_def["source"]
+                if fixture_path.exists():
+                    import shutil
+                    shutil.copy2(fixture_path, safe_path)
+                else:
+                    logger.error(f"Fixture not found: {fixture_path}")
+
+    def run_task(self, task: Task) -> TaskResult:
+        """Execute a single task with full agent loop: LLM generates code, runtime executes, validator checks.
+        
+        If self.n_runs > 1, this represents a single run of the task.
+        The wrapper `run_suite` handles aggregating multiple runs.
+        """
+        if self.backend not in task.supported_backends:
+            return TaskResult(
+                task_id=task.id,
+                task_name=task.name,
+                category=task.category,
+                difficulty=task.difficulty,
+                success=False,
+                score=0.0,
+                execution_time=0.0,
+                output="",
+                error=None,
+                validation={},
+                backend=self.backend,
+                timestamp=time.time(),
+                skipped=True,
+                skip_reason=f"Backend '{self.backend}' not in supported backends {task.supported_backends}"
+            )
+            
+        try:
+            self.setup_workspace(task)
+            
+            # Setup executor
+            executor = self._create_executor() if self.cold_start else self._shared_executor
+            
+            # Override guardrail max_execution_time for this task
+            if hasattr(executor, 'guardrail_config') and executor.guardrail_config is not None:
+                executor.guardrail_config.max_execution_time = task.timeout + 2
+            
+            # Agent Loop: Generation -> Execution -> Validation
+            overall_start_time = time.time()
+            llm_gen_time_total = 0.0
+            exec_time_total = 0.0
+            
+            iteration = 0
+            # Use LLM retries if generator available, otherwise single shot with reference code
+            max_iterations = task.max_retries if self.code_generator and task.prompt else 1
+            passed = False
+            score = 0.0
+            details = {}
+            output_str = ""
+            error_str = None
+            
+            # Context for LLM retries
+            previous_errors = []
+            
+            while iteration < max_iterations and not passed:
+                iteration += 1
+                
+                # 1. Generation Phase (Agent generates code)
+                if self.code_generator and task.prompt:
+                    # Natural language task - agent generates solution
+                    prompt = f"Write a Python script to solve this task:\n\n{task.prompt}\n\nYour script should print output that can be validated."
+                    if previous_errors:
+                        prompt += f"\n\nPrevious attempts failed. Fix these errors:\n"
+                        for i, prev_err in enumerate(previous_errors):
+                            prompt += f"\nAttempt {i+1}:\n```\n{prev_err}\n```\n"
+                    
+                    llm_start = time.time()
+                    try:
+                        code_to_run = self.code_generator.generate_complete_code(
+                            required_tools={},
+                            task_description=prompt,
+                            task_specific_calls="",
+                            header_comment="# MRBS Agent Task",
+                            skill_listing=""
+                        )
+                        if not code_to_run or code_to_run.strip() == "":
+                            raise ValueError("LLM returned empty code")
+                        # If fallback produced no executable code (only comments), use reference for meaningful result
+                        if "# No usage code generated" in code_to_run and task.reference_code:
+                            code_to_run = task.reference_code
+                            logger.info("Using reference code (LLM fallback had no executable code)")
+                    except Exception as e:
+                        logger.error(f"LLM Generation failed: {e}")
+                        error_str = f"LLM Generation failed: {e}"
+                        break
+                    llm_gen_time_total += (time.time() - llm_start)
+                else:
+                    # Fallback to reference code for baseline comparison
+                    code_to_run = task.reference_code
+                    if not code_to_run:
+                        error_str = "No prompt for LLM generation and no reference code available."
+                        break
+                
+                # 2. Execution Phase
+                exec_start = time.time()
+                result, output, error = executor.execute(code_to_run)
+                exec_time_total += (time.time() - exec_start)
+                
+                output_str = str(output) if output is not None else ""
+                error_str = str(error) if error is not None else None
+                
+                # 3. Validation Phase
+                if result == ExecutionResult.SUCCESS:
+                    passed, score, details = Validator.validate(task, output_str)
+                    if score < task.min_score:
+                        passed = False
+                        if not error_str:
+                            error_str = "Validation failed: output did not meet minimum score requirements."
+                            if details.get("error"):
+                                error_str += f" Reason: {details['error']}"
+                else:
+                    passed = False
+                    score = 0.0
+                    details = {"error": f"Execution failed with status: {result}"}
+                    if not error_str:
+                        error_str = f"Sandbox Exception: {result.name}"
+                
+                # Setup feedback for next iteration if failed
+                if not passed:
+                    feedback = ""
+                    if error_str:
+                        feedback += f"Runtime Error:\n{error_str}\n"
+                    if output_str:
+                        feedback += f"Runtime Output:\n{output_str}\n"
+                    feedback += f"Validation State: {details}"
+                    previous_errors.append(feedback)
+            
+            overall_end_time = time.time()
+            total_tts = overall_end_time - overall_start_time
+            
+            # Cleanup executor if we created a fresh one
+            if self.cold_start and hasattr(executor, "close"):
+                pass
+                
+            return TaskResult(
+                task_id=task.id,
+                task_name=task.name,
+                category=task.category,
+                difficulty=task.difficulty,
+                success=passed,
+                score=score,
+                execution_time=exec_time_total, # Only the substrate time
+                output=output_str,
+                error=error_str,
+                validation=details,
+                backend=self.backend,
+                timestamp=time.time(),
+                skipped=False,
+                
+                # Agentic stats
+                iterations=iteration,
+                total_time=total_tts,
+                llm_generation_time=llm_gen_time_total,
+                final_error=error_str if not passed else None
+            )
+            
+        except BaseException as e:
+            # Catch BaseException to handle pyo3 Rust panics and other critical errors
+            logger.error(f"Task {task.id} failed catastrophically: {e}")
+            return TaskResult(
+                task_id=task.id,
+                task_name=task.name,
+                category=task.category,
+                difficulty=task.difficulty,
+                success=False,
+                score=0.0,
+                execution_time=0.0,
+                output="",
+                error=str(e),
+                validation={"error": "Harness exception"},
+                backend=self.backend,
+                timestamp=time.time(),
+                skipped=False,
+                
+                iterations=1,
+                total_time=0.0,
+                llm_generation_time=0.0,
+                final_error=str(e)
+            )
+
+
+    def run_suite(self, tasks: List[Task]) -> List[TaskResult]:
+        """Run a suite of tasks, possibly multiple times."""
+        all_results = []
+        
+        try:
+            from tqdm import tqdm
+            has_tqdm = True
+        except ImportError:
+            has_tqdm = False
+            
+        total_runs = len(tasks) * self.n_runs
+        iterator = range(total_runs)
+        if has_tqdm:
+            iterator = tqdm(iterator, desc=f"Running on {self.backend}")
+            
+        count = 0
+        for task in tasks:
+            for run_idx in range(self.n_runs):
+                res = self.run_task(task)
+                all_results.append(res)
+                
+                count += 1
+                if has_tqdm:
+                    # Don't update the description every time, it's slow
+                    if count % 5 == 0 or count == total_runs:
+                        pass
+                else:
+                    print(f"[{count}/{total_runs}] {task.id} (Run {run_idx+1}/{self.n_runs}): "
+                          f"{'Skipped' if res.skipped else 'Pass' if res.success else 'Fail'} "
+                          f"({res.execution_time:.2f}s)")
+                          
+        return all_results

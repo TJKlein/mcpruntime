@@ -30,16 +30,15 @@ cp .env.example .env   # Add your API keys here
 docker compose up
 ```
 
-Alternatively, you can run other execution backends using Docker profiles:
+Alternatively, you can run with Monty (no Docker required):
 ```bash
-docker compose --profile microsandbox up   # Full MicroVM isolation (privileged mode required)
 docker compose --profile monty up          # Zero-dependency, in-process execution
 ```
 
 ---
 ## ⚡️ Quick Start
 
-MCPRuntime works with **three execution backends**. Pick whichever matches your setup — they all work the same way once running.
+MCPRuntime works with **Docker, OpenSandbox, and Monty** execution backends. Pick whichever matches your setup — they all work the same way once running.
 
 ### Option A — OpenSandbox (Default, recommended)
 *Requires: Docker + one install command*
@@ -82,23 +81,20 @@ python examples/00_simple_api.py
 
 ---
 
-### Option C — Microsandbox (Full OS isolation)
-*Requires: Rust toolchain + build from source*
+### Option C — Docker (Bare Containers)
+*Requires: Docker Desktop (or Colima/Rancher)*
+
+The simplest Docker-based execution without additional servers:
 
 ```bash
-# 1. Install Microsandbox via Git
-pip install git+https://github.com/TJKlein/microsandbox.git
-
-# 2. Install MCPRuntime
-pip install mcp-agent-runtime
-
-# 3. Set sandbox type
-export SANDBOX_TYPE=microsandbox  # or set sandbox_type: microsandbox in config.yaml
-
-# 4. Run an agent
+# 1. Docker Desktop must be running
+# 2. Run directly with Docker backend
 export OPENAI_API_KEY=your-key-here
+export SANDBOX_TYPE=docker
 python examples/00_simple_api.py
 ```
+
+> **Recommended** for benchmarking: The Docker backend provides the best balance of compatibility (100% of tasks pass), speed (~0.4s per task), and simplicity (no server to manage).
 
 > Best for: tasks needing full system packages (`apt`, compilers, databases).
 
@@ -162,9 +158,9 @@ Contemporary agent frameworks often conflate logic, planning, and execution into
 > **Thesis**: The interesting complexity in agent systems lies not just in prompt engineering, but in the runtime ability to safely execute generated programs across diverse environments — and to **learn from them** by evolving a persistent tool library.
 
 MCPRuntime provides a unified API over three foundational execution paradigms:
-1.  **Docker Containers** (via OpenSandbox) for standard workloads.
+1.  **Docker Containers** (bare or via OpenSandbox) for standard workloads.
 2.  **In-Process AST Evaluation** (via Monty) for sub-millisecond reasoning loops.
-3.  **MicroVMs** (via Microsandbox) for total OS-level isolation.
+3.  **Raw Subprocess** for development and baseline comparison.
 
 By standardizing execution, MCPRuntime handles the heavy lifting of state management, context limits, and tool persistence, letting developers focus on the agent's cognitive loop.
 
@@ -199,8 +195,6 @@ MCPRuntime is backend-agnostic. You can hot-swap the execution engine in `config
     *   *Best for*: Standard workloads requiring familiar Docker environments. Runs any image (`python`, `node`, etc.) locally.
 *   **Monty**: [High-performance secure Python AST interpreter](https://github.com/pydantic/monty).
     *   *Best for*: Pure logic, reasoning loops, and CI environments. Delivers **sub-millisecond cold starts** with zero external dependencies.
-*   **Microsandbox**: Full Linux MicroVMs natively isolated via `chroot`/namespaces.
-    *   *Best for*: Untrusted execution needing full system packages (compilers, databases, `apt`). Offers highest OS isolation.
 
 ### Key Features
 *   **Model Context Protocol (MCP)**: Native support for MCP tools.
@@ -226,11 +220,13 @@ opensandbox-server init-config ~/.sandbox.toml --example docker
 opensandbox-server start
 ```
 
-### 3. Untrusted workloads setup (Microsandbox)
-For full OS isolation using MicroVMs:
+### 3. Untrusted workloads setup (OpenSandbox)
+For full OS isolation using Docker containers:
 ```bash
-pip install git+https://github.com/TJKlein/microsandbox.git
-pip install mcp-agent-runtime
+pip install opensandbox opensandbox-server
+opensandbox-server init-config ~/.sandbox.toml --example docker
+# Start Docker Desktop, then:
+opensandbox-server start
 ```
 
 ### 4. Verify Setup
@@ -316,7 +312,7 @@ Turn 2 (related task):
 
 This closed-loop creates an **accumulating advantage**: the more tasks the agent solves, the richer its tool library becomes, and the faster and cheaper future tasks execute.
 
-**Backend Compatibility:** Skill Evolution is seamlessly integrated across all MCPRuntime runtimes natively. Whether executing standard scripts in `microsandbox`, running containers via `OpenSandbox`, running high-performance AST evaluations via `MontyExecutor`, or processing infinite-context chunks through the `RecursiveAgent`, evolved skills are automatically saved, discovered, and shared between all backends.
+**Backend Compatibility:** Skill Evolution is seamlessly integrated across all MCPRuntime runtimes natively. Whether running containers via Docker/OpenSandbox, running high-performance AST evaluations via `MontyExecutor`, or processing infinite-context chunks through the `RecursiveAgent`, evolved skills are automatically saved, discovered, and shared between all backends.
 
 > See [`examples/17_skill_evolution.py`](examples/17_skill_evolution.py) for an end-to-end demo.
 
@@ -383,7 +379,60 @@ For long-running tasks, waiting for the final output can break the illusion of a
 
 > See [`examples/18_streaming.py`](examples/18_streaming.py) for a client-side streaming demo.
 
-## 10. Development and Testing
+## 10. MCPRuntime Benchmark Suite (MRBS)
+
+The **MCPRuntime Benchmark Suite (MRBS)** is the first comprehensive benchmark for evaluating **agent execution runtimes**. Unlike traditional benchmarks that test pre-written code, MRBS tests the complete agent loop: LLM generates code from natural language tasks, the runtime executes it, and validators check correctness.
+
+This provides actionable insights: *Which backend should I use for my agent workload?*
+
+### What MRBS Measures
+
+| Metric | Why It Matters |
+|--------|---------------|
+| **Agent Success Rate** | % of tasks where LLM-generated code passes validation |
+| **Time-to-Success (TTS)** | Total latency from prompt to working output |
+| **Iterations Needed** | How many retries for agent to succeed |
+| **Category Breakdown** | Per-category success rates reveal backend strengths/weaknesses |
+
+### The 75 Task Taxonomy
+
+*   **Compute** (19): Algorithms (FizzBuzz, sorting, dynamic programming, TSP, FFT)
+*   **Import-Heavy** (12): Package loading (pandas, numpy, scipy workflows)
+*   **I/O** (12): File operations, directory traversal, state management
+*   **Memory** (10): Data structures, allocation patterns
+*   **Concurrency** (10): Threading, asyncio, synchronization
+*   **Enterprise** (16): Real-world patterns (ETL, state machines, retry logic)
+
+### Running MRBS
+
+MRBS has **two evaluation modes** with different purposes:
+
+**1. LLM Mode (Realistic Agent Evaluation)**
+```bash
+# LLM generates code from natural language prompts
+python -m benchmarks run --backend docker --llm-provider azure_openai
+
+# Results: ~70-90% pass rate (realistic - LLMs make mistakes!)
+# Report: "Our agent achieves 83% on MRBS with gpt-5.2-chat"
+```
+
+**2. Baseline Mode (Infrastructure Verification)**
+```bash
+# Runs hand-written reference code (no LLM)
+python -m benchmarks run --backend docker --llm-provider none
+
+# Results: ~100% pass rate (expected - verifies infrastructure works)
+# Report: "Docker backend executes 19/19 tasks at 0.4s average"
+```
+
+**Backend Recommendations:**
+- **Docker** (bare containers): 100% pass rate (19/19), ~0.4s per task. **Best for benchmarking** - simple, fast, compatible.
+- **OpenSandbox** (Docker via server): 100% pass rate (19/19), ~3s per task. Best for advanced orchestration features.
+- **Monty** (in-process): 100% pass rate (13/13 compute only), ~0.4s per task. Best for maximum speed on compute tasks.
+
+> See **[MRBS Guide](docs/benchmark_guide.md)** for NeurIPS-compliant reporting, statistical rigor, and detailed taxonomy.
+
+## 11. Development and Testing
 
 See **[CONTRIBUTING.md](CONTRIBUTING.md)** for setup and contribution guidelines.
 
@@ -405,7 +454,7 @@ MCPRuntime stands on the shoulders of giants.
 *   **[Anthropic: Code Execution with MCP](https://www.anthropic.com/engineering/code-execution-with-mcp)** — The Programmatic Tool Calling pattern: tools as importable code, not JSON schemas.
 *   **[Cloudflare: Code Mode](https://blog.cloudflare.com/code-mode/)** — Production-scale implementation of code-based tool calling.
 *   **[Recursive Language Models](https://arxiv.org/abs/2512.24601)** — Research into infinite context processing via recursive querying.
-*   **[Microsandbox](https://github.com/TJKlein/microsandbox)** — The robust MicroVM runtime for secure code execution.
+*   ~~[Microsandbox](https://github.com/TJKlein/microsandbox)~~ — (Not currently integrated due to SDK compatibility issues)
 *   **[Monty](https://github.com/pydantic/monty)** — High-performance, sandboxed Python interpreter.
 *   **[OpenSandbox](https://github.com/alibaba/OpenSandbox)** — Docker/Kubernetes-based local sandbox platform by Alibaba.
 
@@ -417,4 +466,4 @@ If you find MCPRuntime useful, consider starring the repository on GitHub. Stars
 
 MIT &copy; 2026 MCPRuntime Team. Developed with the support of the **[Mantix](https://mantix.cloud)** AI Team.
 
-*Please note: MCPRuntime relies on several third-party open-source components, such as Microsandbox and OpenSandbox, which are licensed under the Apache License 2.0. See the `NOTICE` and `LICENSE` files for full details and attribution.*
+*Please note: MCPRuntime relies on third-party open-source components such as OpenSandbox and Monty, which are licensed under the Apache License 2.0. See the `NOTICE` and `LICENSE` files for full details and attribution.*

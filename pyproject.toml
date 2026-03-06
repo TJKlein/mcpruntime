@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mcp-agent-runtime"
-version = "0.1.4"
+version = "0.1.5"
 description = "The High-Performance Local Runtime for Autonomous Agents"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -24,7 +24,6 @@ classifiers = [
 
 dependencies = [
     "fastmcp>=0.1.0",
-    "microsandbox>=0.1.8",
     "pydantic>=2.0.0",
     "pyyaml>=6.0",
     "typing-extensions>=4.8.0",
@@ -32,6 +31,7 @@ dependencies = [
     "openai>=1.0.0",
     "sentence-transformers>=2.2.0",
     "numpy>=1.24.0",
+    "httpx>=0.24.0",
 ]
 
 [project.optional-dependencies]
@@ -52,7 +52,7 @@ Documentation = "https://github.com/TJKlein/mcpruntime/blob/main/DOCS.md"
 Repository = "https://github.com/TJKlein/mcpruntime"
 
 [tool.setuptools]
-packages = ["mcpruntime", "client", "config", "server"]
+packages = ["mcpruntime", "client", "config", "server", "benchmarks"]
 
 [tool.black]
 line-length = 100
@@ -114,7 +114,6 @@ show_error_codes = true
 [[tool.mypy.overrides]]
 module = [
     "fastmcp.*",
-    "microsandbox.*",
 ]
 ignore_missing_imports = true
 

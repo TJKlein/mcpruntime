@@ -1,0 +1,329 @@
+[
+  {
+    "id": "F01",
+    "name": "Parse and validate config",
+    "difficulty": "easy",
+    "description": "Parse a JSON config file and validate required fields and types.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "enterprise",
+      "config"
+    ],
+    "setup_files": [
+      {
+        "path": "config.json",
+        "content": "{\"host\":\"api.example.com\",\"port\":443,\"timeout\":30,\"retries\":3,\"features\":[\"a\",\"b\"],\"enabled\":true}"
+      }
+    ],
+    "reference_code": "import json\ndef validate(cfg):\n    req = {'host': str, 'port': int, 'timeout': int, 'enabled': bool}\n    for k, v in req.items():\n        if k not in cfg or not isinstance(cfg[k], v):\n            return False\n    return cfg.get('port') > 0 and cfg.get('timeout') <= 60\nwith open('config.json') as f: config = json.load(f)\nprint(f'Config valid: {validate(config)}')\nprint(f'Host: {config[\"host\"]}')",
+    "expected_output": "Config valid: True\nHost: api.example.com\n",
+    "prompt": "Read 'config.json' and validate that it has required fields (host as string, port as positive int, timeout as int <= 60, enabled as bool). Print whether the config is valid and the host value."
+  },
+  {
+    "id": "F02",
+    "name": "Analyze log file",
+    "difficulty": "easy",
+    "description": "Scan a log file for ERROR and WARNING patterns and count occurrences.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "enterprise",
+      "logs",
+      "io"
+    ],
+    "setup_files": [
+      {
+        "path": "app.log",
+        "content": "INFO: Startup\nDEBUG: Init\nWARN: Slow connection\nERROR: DB Timeout\nINFO: Request handled\nERROR: Null pointer\n"
+      }
+    ],
+    "reference_code": "errors = 0; warns = 0\n# We amplify the setup file virtually\nlog_lines = open('app.log').read().splitlines() * 1000\nfor line in log_lines:\n    if 'ERROR:' in line: errors += 1\n    elif 'WARN:' in line: warns += 1\nprint(f'Errors: {errors}\nWarnings: {warns}')",
+    "expected_output": "Errors: 1000\nWarnings: 0\n",
+    "prompt": "Read 'app.log' and count occurrences of lines containing 'ERROR:' and 'WARN:'. Note: the file is repeated 1000 times virtually. Print the counts for both error types."
+  },
+  {
+    "id": "F03",
+    "name": "Handle environment variables",
+    "difficulty": "easy",
+    "description": "Read, validate, and construct configuration from environment variables.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "enterprise",
+      "env"
+    ],
+    "reference_code": "import os\nos.environ['DB_HOST'] = 'localhost'\nos.environ['DB_PORT'] = '5432'\nos.environ['APP_ENV'] = 'production'\n\ndef get_db_url():\n    host = os.getenv('DB_HOST', '127.0.0.1')\n    port = os.getenv('DB_PORT', '5432')\n    try: int(port)\n    except: port = '5432'\n    return f'postgresql://{host}:{port}/db'\n\nprint(f'Environment: {os.getenv(\"APP_ENV\", \"development\")}')\nprint(f'DB URL: {get_db_url()}')",
+    "expected_output": "Environment: production\nDB URL: postgresql://localhost:5432/db\n",
+    "prompt": "Set environment variables DB_HOST='localhost', DB_PORT='5432', APP_ENV='production'. Create a function get_db_url() that reads these with defaults. Print the APP_ENV value and the constructed DB URL."
+  },
+  {
+    "id": "F04",
+    "name": "Implement retry logic",
+    "difficulty": "easy",
+    "description": "Implement a retry decorator that succeeds on the 3rd attempt after simulated failures.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "enterprise",
+      "resilience"
+    ],
+    "reference_code": "import time\nattempts = 0\ndef fetch_data():\n    global attempts\n    attempts += 1\n    if attempts < 3:\n        raise ConnectionError('Network timeout')\n    return {'status': 200, 'data': 'ok'}\n\ndef retry(func, max_tries=5):\n    for i in range(max_tries):\n        try:\n            return func()\n        except Exception as e:\n            if i == max_tries - 1: raise\n    return None\n\nres = retry(fetch_data)\nprint(f'Result: {res}')\nprint(f'Attempts used: {attempts}')",
+    "expected_output": "Result: {'status': 200, 'data': 'ok'}\nAttempts used: 3\n",
+    "prompt": "Implement a retry function that takes a callable and max_tries. Create fetch_data() that fails on attempts 1 and 2 with ConnectionError, succeeds on attempt 3. Use retry to call fetch_data and print the result and number of attempts used."
+  },
+  {
+    "id": "F05",
+    "name": "Build ETL pipeline",
+    "difficulty": "medium",
+    "description": "Extract JSON data, transform (filter and lowercase), load (return stats).",
+    "supported_backends": [
+      "monty",
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "enterprise",
+      "etl"
+    ],
+    "setup_files": [
+      {
+        "path": "raw_data.jsonl",
+        "content": "{\"name\":\"Alice\",\"age\":30,\"city\":\"NYC\",\"active\":true}\n{\"name\":\"Bob\",\"age\":25,\"city\":\"LA\",\"active\":false}\n{\"name\":\"Carol\",\"age\":35,\"city\":\"CHI\",\"active\":true}\n{\"name\":\"Dave\",\"age\":28,\"city\":\"NYC\",\"active\":true}\n{\"name\":\"Eve\",\"age\":22,\"city\":\"LA\",\"active\":false}"
+      }
+    ],
+    "reference_code": "import json\n\ndef etl():\n    records = []\n    with open('raw_data.jsonl') as f:\n        for line in f:\n            rec = json.loads(line.strip())\n            # Transform\n            rec['name'] = rec['name'].lower()\n            rec['city'] = rec['city'].lower()\n            rec['age_group'] = 'adult' if rec['age'] >= 18 else 'minor'\n            records.append(rec)\n    \n    # Filter\n    active = [r for r in records if r['active']]\n    nyc_users = [r for r in active if r['city'] == 'nyc']\n    \n    return {\n        'total': len(records),\n        'active': len(active),\n        'nyc_active': len(nyc_users),\n        'avg_age_active': sum(r['age'] for r in active) / len(active) if active else 0\n    }\n\nstats = etl()\nprint(f'Total: {stats[\"total\"]}, Active: {stats[\"active\"]}, NYC Active: {stats[\"nyc_active\"]}')\nprint(f'Avg age (active): {stats[\"avg_age_active\"]:.1f}')",
+    "expected_output": "Total: 5, Active: 3, NYC Active: 2\nAvg age (active): 31.0\n",
+    "prompt": "Read 'raw_data.jsonl' containing one JSON object per line. For each record: convert name and city to lowercase, add 'age_group' field ('adult' if age >= 18). Filter to active users, then count total records, active users, NYC active users, and average age of active users. Print all statistics."
+  },
+  {
+    "id": "F06",
+    "name": "State machine workflow",
+    "difficulty": "medium",
+    "description": "Implement a simple finite state machine for an order processing workflow.",
+    "supported_backends": [
+      "monty",
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "enterprise",
+      "state_machine"
+    ],
+    "reference_code": "class OrderStateMachine:\n    def __init__(self):\n        self.state = 'pending'\n        self.transitions = []\n    \n    def transition(self, event):\n        rules = {\n            'pending': {'pay': 'paid', 'cancel': 'cancelled'},\n            'paid': {'ship': 'shipped', 'refund': 'refunded'},\n            'shipped': {'deliver': 'delivered'},\n            'cancelled': {},\n            'refunded': {},\n            'delivered': {}\n        }\n        if event in rules.get(self.state, {}):\n            old = self.state\n            self.state = rules[self.state][event]\n            self.transitions.append((old, event, self.state))\n            return True\n        return False\n    \n    def get_history(self):\n        return self.transitions\n\n# Test workflow\nsm = OrderStateMachine()\nsm.transition('pay')\nsm.transition('ship')\nsm.transition('deliver')\n\nprint(f'Final state: {sm.state}')\nprint(f'Transitions: {len(sm.get_history())}')",
+    "expected_output": "Final state: delivered\nTransitions: 3\n",
+    "prompt": "Implement an OrderStateMachine class with states: pending, paid, shipped, delivered, cancelled, refunded. Transitions: pending -> pay -> paid -> ship -> shipped -> deliver -> delivered. Implement transition(event) that returns True if successful, get_history() that returns list of (from, event, to) tuples. Create instance, transition through pay->ship->deliver, and print final state and number of transitions."
+  },
+  {
+    "id": "F07",
+    "name": "Circuit breaker pattern",
+    "difficulty": "medium",
+    "description": "Implement a circuit breaker that opens after 3 failures.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "enterprise",
+      "resilience",
+      "pattern"
+    ],
+    "reference_code": "class CircuitBreaker:\n    def __init__(self, failure_threshold=3, recovery_timeout=5):\n        self.failure_threshold = failure_threshold\n        self.recovery_timeout = recovery_timeout\n        self.failure_count = 0\n        self.state = 'CLOSED'  # CLOSED, OPEN, HALF_OPEN\n        self.last_failure_time = None\n    \n    def call(self, func, *args, **kwargs):\n        if self.state == 'OPEN':\n            raise Exception('Circuit breaker is OPEN')\n        \n        try:\n            result = func(*args, **kwargs)\n            if self.state == 'HALF_OPEN':\n                self.state = 'CLOSED'\n                self.failure_count = 0\n            return result\n        except Exception as e:\n            self.failure_count += 1\n            self.last_failure_time = 0  # Mock time\n            if self.failure_count >= self.failure_threshold:\n                self.state = 'OPEN'\n            raise e\n    \n    def get_state(self):\n        return self.state\n\n# Test\ncb = CircuitBreaker(failure_threshold=3)\nfailures = 0\nfor i in range(5):\n    try:\n        cb.call(lambda: (_ for _ in ()).throw(Exception('Fail')))\n    except Exception as e:\n        failures += 1\n\nprint(f'Final state: {cb.get_state()}')\nprint(f'Failures caught: {failures}')",
+    "expected_output": "Final state: OPEN\nFailures caught: 5\n",
+    "prompt": "Implement a CircuitBreaker class with states CLOSED, OPEN, HALF_OPEN. After 3 failures, transition to OPEN. In OPEN state, raise exception immediately. Implement call(func) that tracks failures and state. Create circuit breaker with threshold=3, call a failing function 5 times, and print final state and number of caught failures."
+  },
+  {
+    "id": "F08",
+    "name": "Rate limiter (token bucket)",
+    "difficulty": "medium",
+    "description": "Implement a token bucket rate limiter.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "enterprise",
+      "rate_limiting"
+    ],
+    "reference_code": "class TokenBucket:\n    def __init__(self, capacity, fill_rate):\n        self.capacity = capacity\n        self.tokens = capacity\n        self.fill_rate = fill_rate\n        self.last_update = 0  # Mock time\n    \n    def consume(self, tokens=1):\n        # Add tokens based on time passed (mock)\n        self.tokens = min(self.capacity, self.tokens + self.fill_rate)\n        \n        if tokens <= self.tokens:\n            self.tokens -= tokens\n            return True\n        return False\n    \n    def get_tokens(self):\n        return self.tokens\n\n# Test\nbucket = TokenBucket(capacity=10, fill_rate=1)\nresults = []\nfor i in range(15):\n    results.append(bucket.consume(1))\n\nallowed = sum(results)\nrejected = len(results) - allowed\nprint(f'Requests allowed: {allowed}')\nprint(f'Requests rejected: {rejected}')\nprint(f'Remaining tokens: {bucket.get_tokens()}')",
+    "expected_output": "Requests allowed: 15\nRequests rejected: 0\nRemaining tokens: 10\n",
+    "prompt": "Implement a TokenBucket rate limiter with capacity and fill_rate. consume(tokens) returns True if enough tokens available, False otherwise. Start with bucket capacity=10, fill_rate=1. Try to consume 1 token 15 times (tokens should refill). Print how many were allowed, rejected, and remaining tokens."
+  },
+  {
+    "id": "F09",
+    "name": "Database connection pool",
+    "difficulty": "medium",
+    "description": "Simulate a connection pool with max connections and timeout.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "enterprise",
+      "pooling"
+    ],
+    "reference_code": "class ConnectionPool:\n    def __init__(self, max_connections):\n        self.max_connections = max_connections\n        self.available = max_connections\n        self.connections = []\n    \n    def acquire(self):\n        if self.available > 0:\n            self.available -= 1\n            conn_id = len(self.connections)\n            self.connections.append(conn_id)\n            return conn_id\n        return None\n    \n    def release(self, conn_id):\n        if conn_id in self.connections:\n            self.connections.remove(conn_id)\n            self.available += 1\n            return True\n        return False\n    \n    def get_available(self):\n        return self.available\n\n# Test\npool = ConnectionPool(max_connections=3)\nacquired = []\nfor i in range(5):\n    conn = pool.acquire()\n    if conn is not None:\n        acquired.append(conn)\n\nprint(f'Acquired: {len(acquired)}')\nprint(f'Available: {pool.get_available()}')\n\n# Release all\nfor conn in acquired:\n    pool.release(conn)\n\nprint(f'After release: {pool.get_available()}')",
+    "expected_output": "Acquired: 3\nAvailable: 0\nAfter release: 3\n",
+    "prompt": "Implement a ConnectionPool class with max_connections. Methods: acquire() returns connection ID or None if full, release(conn_id) returns True if released, get_available() returns count. Create pool with max=3, acquire 5 connections, print how many acquired and available. Release all, print available count."
+  },
+  {
+    "id": "F10",
+    "name": "API request batching",
+    "difficulty": "medium",
+    "description": "Batch multiple API requests into a single payload.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "enterprise",
+      "batching"
+    ],
+    "reference_code": "class BatchProcessor:\n    def __init__(self, batch_size):\n        self.batch_size = batch_size\n        self.queue = []\n        self.batches_sent = 0\n    \n    def add(self, item):\n        self.queue.append(item)\n        if len(self.queue) >= self.batch_size:\n            return self.flush()\n        return None\n    \n    def flush(self):\n        if not self.queue:\n            return None\n        batch = self.queue[:self.batch_size]\n        self.queue = self.queue[self.batch_size:]\n        self.batches_sent += 1\n        return batch\n    \n    def get_stats(self):\n        return {'queued': len(self.queue), 'sent': self.batches_sent}\n\n# Test\nbp = BatchProcessor(batch_size=5)\nresults = []\nfor i in range(12):\n    result = bp.add({'id': i, 'data': f'item_{i}'})\n    if result:\n        results.append(len(result))\n\n# Flush remaining\nfinal = bp.flush()\nif final:\n    results.append(len(final))\n\nstats = bp.get_stats()\nprint(f'Batches: {len(results)}')\nprint(f'Batch sizes: {results}')\nprint(f'Remaining queued: {stats[\"queued\"]}')",
+    "expected_output": "Batches: 3\nBatch sizes: [5, 5, 2]\nRemaining queued: 0\n",
+    "prompt": "Implement a BatchProcessor class with batch_size. Methods: add(item) adds item and returns batch if full, flush() returns remaining items, get_stats() returns queued count and sent count. Add 12 items with batch_size=5, collecting batch sizes. Flush remaining. Print number of batches, batch sizes list, and remaining queued."
+  },
+  {
+    "id": "F11",
+    "name": "Health check aggregator",
+    "difficulty": "medium",
+    "description": "Aggregate health checks from multiple services.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "enterprise",
+      "health_check"
+    ],
+    "reference_code": "class HealthAggregator:\n    def __init__(self):\n        self.services = {}\n    \n    def register(self, name, check_func):\n        self.services[name] = check_func\n    \n    def check_all(self):\n        results = {}\n        overall = True\n        for name, check in self.services.items():\n            try:\n                healthy = check()\n                results[name] = 'healthy' if healthy else 'unhealthy'\n                if not healthy:\n                    overall = False\n            except Exception as e:\n                results[name] = f'error: {e}'\n                overall = False\n        return {'overall': 'healthy' if overall else 'unhealthy', 'services': results}\n\n# Test\nagg = HealthAggregator()\nagg.register('db', lambda: True)\nagg.register('cache', lambda: True)\nagg.register('api', lambda: False)\n\nstatus = agg.check_all()\nhealthy_count = sum(1 for s in status['services'].values() if s == 'healthy')\nprint(f'Overall: {status[\"overall\"]}')\nprint(f'Healthy services: {healthy_count}/{len(status[\"services\"])}')",
+    "expected_output": "Overall: unhealthy\nHealthy services: 2/3\n",
+    "prompt": "Implement a HealthAggregator class. Methods: register(name, check_func) adds service, check_all() runs all checks and returns {'overall': 'healthy'/'unhealthy', 'services': {name: status}}. Register db (True), cache (True), api (False), check all, count healthy services, and print overall status and healthy count."
+  },
+  {
+    "id": "F12",
+    "name": "Feature flag evaluator",
+    "difficulty": "hard",
+    "description": "Evaluate feature flags with user targeting and percentage rollout.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "enterprise",
+      "feature_flags"
+    ],
+    "reference_code": "import hashlib\n\nclass FeatureFlags:\n    def __init__(self, config):\n        self.config = config\n    \n    def is_enabled(self, flag_name, user_id=None):\n        flag = self.config.get(flag_name)\n        if not flag:\n            return False\n        \n        if flag.get('enabled') == False:\n            return False\n        \n        # Check user targeting\n        target_users = flag.get('target_users', [])\n        if user_id and user_id in target_users:\n            return True\n        \n        # Percentage rollout\n        rollout = flag.get('rollout_percent', 0)\n        if user_id:\n            # Deterministic based on user_id\n            hash_val = int(hashlib.md5(f'{flag_name}:{user_id}'.encode()).hexdigest(), 16)\n            user_bucket = hash_val % 100\n            return user_bucket < rollout\n        \n        return rollout >= 100\n\n# Test\nconfig = {\n    'new_feature': {'enabled': True, 'rollout_percent': 50},\n    'beta_feature': {'enabled': True, 'target_users': ['user_123']},\n    'disabled_feature': {'enabled': False}\n}\n\nff = FeatureFlags(config)\nresults = []\nfor i in range(10):\n    results.append(ff.is_enabled('new_feature', f'user_{i}'))\n\nenabled_count = sum(results)\nprint(f'New feature enabled for: {enabled_count}/10 users')\nprint(f'Beta for user_123: {ff.is_enabled(\"beta_feature\", \"user_123\")}')\nprint(f'Disabled feature: {ff.is_enabled(\"disabled_feature\", \"user_1\")}')",
+    "expected_output": "New feature enabled for: 5/10 users\nBeta for user_123: True\nDisabled feature: False\n",
+    "prompt": "Implement a FeatureFlags class with config dict. is_enabled(flag_name, user_id) checks: if flag disabled -> False, if user in target_users -> True, else check percentage rollout using hash of 'flag_name:user_id' mod 100. Test with 3 flags (50% rollout, targeted, disabled) on 10 users. Print enabled count for new_feature, and results for beta_feature user_123 and disabled_feature."
+  },
+  {
+    "id": "F13",
+    "name": "Workflow DAG executor",
+    "difficulty": "hard",
+    "description": "Execute a Directed Acyclic Graph of dependent tasks.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "enterprise",
+      "workflow",
+      "dag"
+    ],
+    "reference_code": "from collections import defaultdict, deque\n\nclass DAGExecutor:\n    def __init__(self):\n        self.tasks = {}\n        self.dependencies = defaultdict(list)\n        self.dependents = defaultdict(list)\n    \n    def add_task(self, name, func):\n        self.tasks[name] = func\n    \n    def add_dependency(self, task, depends_on):\n        self.dependencies[task].append(depends_on)\n        self.dependents[depends_on].append(task)\n    \n    def execute(self):\n        in_degree = {t: len(self.dependencies[t]) for t in self.tasks}\n        queue = deque([t for t, d in in_degree.items() if d == 0])\n        executed = []\n        results = {}\n        \n        while queue:\n            task = queue.popleft()\n            # Execute\n            results[task] = self.tasks[task](results)\n            executed.append(task)\n            \n            # Update dependents\n            for dep in self.dependents[task]:\n                in_degree[dep] -= 1\n                if in_degree[dep] == 0:\n                    queue.append(dep)\n        \n        return executed if len(executed) == len(self.tasks) else None\n\n# Test\nexecutor = DAGExecutor()\nexecutor.add_task('load_data', lambda ctx: 'raw_data')\nexecutor.add_task('clean_data', lambda ctx: f'cleaned_{ctx[\"load_data\"]}')\nexecutor.add_task('analyze', lambda ctx: f'analyzed_{ctx[\"clean_data\"]}')\nexecutor.add_task('report', lambda ctx: f'report_{ctx[\"analyze\"]}')\n\nexecutor.add_dependency('clean_data', 'load_data')\nexecutor.add_dependency('analyze', 'clean_data')\nexecutor.add_dependency('report', 'analyze')\n\norder = executor.execute()\nprint(f'Execution order: {order}')\nprint(f'Tasks completed: {len(order) if order else 0}')",
+    "expected_output": "Execution order: ['load_data', 'clean_data', 'analyze', 'report']\nTasks completed: 4\n",
+    "prompt": "Implement a DAGExecutor class. Methods: add_task(name, func), add_dependency(task, depends_on), execute() returns execution order respecting dependencies using topological sort. Create 4 tasks forming a chain (load->clean->analyze->report), execute, and print order and completed count."
+  },
+  {
+    "id": "F14",
+    "name": "Event sourcing simulation",
+    "difficulty": "hard",
+    "description": "Implement event sourcing pattern with append-only events and state reconstruction.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "enterprise",
+      "event_sourcing"
+    ],
+    "reference_code": "class EventStore:\n    def __init__(self):\n        self.events = []\n    \n    def append(self, event_type, data):\n        self.events.append({'type': event_type, 'data': data})\n    \n    def get_events(self):\n        return self.events.copy()\n    \n    def get_state(self):\n        balance = 0\n        for e in self.events:\n            if e['type'] == 'deposit':\n                balance += e['data']['amount']\n            elif e['type'] == 'withdrawal':\n                balance -= e['data']['amount']\n        return {'balance': balance, 'transaction_count': len(self.events)}\n\n# Test\nstore = EventStore()\nstore.append('deposit', {'amount': 100})\nstore.append('deposit', {'amount': 50})\nstore.append('withdrawal', {'amount': 30})\nstore.append('deposit', {'amount': 20})\n\nstate = store.get_state()\nprint(f'Balance: {state[\"balance\"]}')\nprint(f'Transactions: {state[\"transaction_count\"]}')\nprint(f'Events stored: {len(store.get_events())}')",
+    "expected_output": "Balance: 140\nTransactions: 4\nEvents stored: 4\n",
+    "prompt": "Implement an EventStore class for event sourcing. Methods: append(event_type, data), get_events() returns copy, get_state() reconstructs balance from deposit/withdrawal events. Add 4 events (deposit 100, deposit 50, withdrawal 30, deposit 20), then print balance, transaction count, and total events stored."
+  },
+  {
+    "id": "F15",
+    "name": "Leader election simulation",
+    "difficulty": "hard",
+    "description": "Implement a simple leader election using bully algorithm concept.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "enterprise",
+      "distributed"
+    ],
+    "reference_code": "class Node:\n    def __init__(self, node_id):\n        self.node_id = node_id\n        self.is_leader = False\n        self.alive = True\n    \n    def elect(self, all_nodes):\n        higher_nodes = [n for n in all_nodes if n.node_id > self.node_id and n.alive]\n        if not higher_nodes:\n            self.is_leader = True\n            return True\n        return False\n\nclass Cluster:\n    def __init__(self, node_ids):\n        self.nodes = {nid: Node(nid) for nid in node_ids}\n        self.leader = None\n    \n    def run_election(self):\n        for nid in sorted(self.nodes.keys(), reverse=True):\n            node = self.nodes[nid]\n            if node.alive and node.elect(list(self.nodes.values())):\n                self.leader = nid\n                break\n        return self.leader\n    \n    def fail_node(self, node_id):\n        if node_id in self.nodes:\n            self.nodes[node_id].alive = False\n            self.nodes[node_id].is_leader = False\n            if self.leader == node_id:\n                self.leader = None\n\n# Test\ncluster = Cluster([1, 2, 3, 4, 5])\nleader1 = cluster.run_election()\nprint(f'Initial leader: {leader1}')\n\n# Fail leader\ncluster.fail_node(leader1)\nleader2 = cluster.run_election()\nprint(f'After failure: {leader2}')",
+    "expected_output": "Initial leader: 5\nAfter failure: 4\n",
+    "prompt": "Implement a simple bully algorithm leader election. Node class with node_id, is_leader, alive. elect(all_nodes) becomes leader if no higher alive nodes. Cluster class manages nodes and runs election from highest ID down. Create cluster with nodes 1-5, run election, print leader, fail leader, run again, print new leader."
+  },
+  {
+    "id": "F16",
+    "name": "Idempotency key handler",
+    "difficulty": "hard",
+    "description": "Ensure operations are idempotent using key tracking.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "enterprise",
+      "idempotency"
+    ],
+    "reference_code": "class IdempotentProcessor:\n    def __init__(self):\n        self.processed_keys = set()\n        self.results = {}\n        self.call_count = 0\n    \n    def process(self, idempotency_key, operation):\n        self.call_count += 1\n        \n        if idempotency_key in self.processed_keys:\n            return {'status': 'duplicate', 'result': self.results[idempotency_key]}\n        \n        # Process\n        result = operation()\n        self.processed_keys.add(idempotency_key)\n        self.results[idempotency_key] = result\n        return {'status': 'processed', 'result': result}\n    \n    def get_stats(self):\n        return {\n            'unique_keys': len(self.processed_keys),\n            'total_calls': self.call_count,\n            'deduplicated': self.call_count - len(self.processed_keys)\n        }\n\n# Test\nprocessor = IdempotentProcessor()\nresults = []\n\n# Same key, multiple calls\nfor i in range(3):\n    res = processor.process('payment_123', lambda: {'amount': 100, 'status': 'success'})\n    results.append(res['status'])\n\n# Different key\nres2 = processor.process('payment_456', lambda: {'amount': 50, 'status': 'success'})\nresults.append(res2['status'])\n\nstats = processor.get_stats()\nprint(f'Results: {results}')\nprint(f'Unique keys: {stats[\"unique_keys\"]}')\nprint(f'Total calls: {stats[\"total_calls\"]}')\nprint(f'Deduplicated: {stats[\"deduplicated\"]}')",
+    "expected_output": "Results: ['processed', 'duplicate', 'duplicate', 'processed']\nUnique keys: 2\nTotal calls: 4\nDeduplicated: 2\n",
+    "prompt": "Implement an IdempotentProcessor class. process(idempotency_key, operation) executes operation only if key not seen before. Track all calls, unique keys, and results. Call 3 times with same key 'payment_123', then once with 'payment_456'. Print status of each call, and stats: unique keys, total calls, deduplicated count."
+  }
+]

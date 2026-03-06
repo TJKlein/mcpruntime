@@ -14,8 +14,8 @@ except ImportError:
 class TestVanillaMontyLive:
     
     @pytest.fixture
-    def agent_helper(self, mock_config, temp_workspace, temp_servers, live_llm_client, live_llm_model_name):
-        """Create a standard AgentHelper with real Monty and Live Client."""
+    def agent_helper(self, mock_config, temp_workspace, temp_servers, live_llm_client, live_llm_model_name, live_app_config):
+        """Create a standard AgentHelper with real Monty and live LLM config from .env."""
         fs_helper = FilesystemHelper(
             workspace_dir=str(temp_workspace),
             servers_dir=str(temp_servers),
@@ -26,13 +26,13 @@ class TestVanillaMontyLive:
             execution_config=mock_config.execution
         )
         
+        # Use live LLM config from .env so CodeGenerator gets api_key, endpoint, etc.
         helper = AgentHelper(
             fs_helper=fs_helper,
             executor=executor,
-            llm_config=mock_config.llm
+            llm_config=live_app_config.llm
         )
         
-        # Inject live client and model/deployment name (Azure needs deployment name)
         helper.code_generator._llm_client = live_llm_client
         helper.code_generator._model_name = live_llm_model_name
         

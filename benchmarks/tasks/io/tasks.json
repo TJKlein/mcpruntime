@@ -1,0 +1,235 @@
+[
+  {
+    "id": "C01",
+    "name": "Write and read text file",
+    "difficulty": "easy",
+    "description": "Create a text file with multiple lines and read it back to verify contents.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "io",
+      "filesystem"
+    ],
+    "reference_code": "data = 'Line of text\\n' * 1000\nwith open('test_c01.txt', 'w') as f:\n    f.write(data)\nwith open('test_c01.txt', 'r') as f:\n    read_data = f.read()\nprint(f'Match: {data == read_data}')\nprint(f'Length: {len(read_data)}')\nimport os\nos.remove('test_c01.txt')",
+    "expected_output": "Match: True\nLength: 13000\n",
+    "prompt": "Write 1000 lines of 'Line of text' to 'test_c01.txt', then read the file back and verify the content matches. Print whether the content matches (True/False) and the length of the read data. Clean up the file."
+  },
+  {
+    "id": "C02",
+    "name": "Create nested directory structure",
+    "difficulty": "easy",
+    "description": "Create a multi-level directory hierarchy.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "io",
+      "directory"
+    ],
+    "reference_code": "import os\npath = 'level1/level2/level3/level4'\nos.makedirs(path, exist_ok=True)\nprint(f'Exists: {os.path.exists(path)}')\nimport shutil\nshutil.rmtree('level1')",
+    "expected_output": "Exists: True\n",
+    "prompt": "Create a nested directory structure: 'level1/level2/level3/level4'. Verify it exists and print True. Clean up by removing 'level1' and all its contents."
+  },
+  {
+    "id": "C03",
+    "name": "Append to log file",
+    "difficulty": "easy",
+    "description": "Repeatedly open, append, and close a file to simulate logging.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "io",
+      "append"
+    ],
+    "reference_code": "import os\nfor i in range(100):\n    with open('test_c03.log', 'a') as f:\n        f.write(f'Log entry {i}\\n')\nwith open('test_c03.log', 'r') as f:\n    lines = f.readlines()\nprint(f'Lines: {len(lines)}')\nprint(f'Last line: {lines[-1].strip()}')\nos.remove('test_c03.log')",
+    "expected_output": "Lines: 100\nLast line: Log entry 99\n",
+    "prompt": "Open 'test_c03.log' 100 times in append mode, each time writing 'Log entry {i}' where i is the iteration number. Then read all lines and print the total count and the last line. Clean up the file."
+  },
+  {
+    "id": "C04",
+    "name": "List directory contents",
+    "difficulty": "easy",
+    "description": "Create multiple files and count them by listing the directory.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "io",
+      "directory"
+    ],
+    "reference_code": "import os\nimport shutil\nos.makedirs('c04_dir', exist_ok=True)\nfor i in range(50):\n    with open(f'c04_dir/file_{i}.txt', 'w') as f:\n        f.write('')\nfiles = os.listdir('c04_dir')\nprint(f'File count: {len(files)}')\nshutil.rmtree('c04_dir')",
+    "expected_output": "File count: 50\n",
+    "prompt": "Create a directory 'c04_dir' and create 50 empty files inside it named 'file_0.txt' through 'file_49.txt'. List the directory contents and print the file count. Clean up the directory."
+  },
+  {
+    "id": "C05",
+    "name": "Multi-file workflow",
+    "difficulty": "medium",
+    "description": "Create multiple files, read them all, and combine their contents.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "io",
+      "batch"
+    ],
+    "reference_code": "import os\nfor i in range(10):\n    with open(f'c05_part_{i}.txt', 'w') as f:\n        f.write(f'Content {i}\\n')\ncombined = ''\nfor i in range(10):\n    with open(f'c05_part_{i}.txt', 'r') as f:\n        combined += f.read()\n    os.remove(f'c05_part_{i}.txt')\nprint(f'Combined length: {len(combined)}')\nprint(f'Has Content 9: {\"Content 9\" in combined}')",
+    "expected_output": "Combined length: 100\nHas Content 9: True\n",
+    "prompt": "Create 10 files named 'c05_part_0.txt' through 'c05_part_9.txt', each containing 'Content {i}'. Read all files, concatenate their contents, delete each file after reading, and print the combined length and whether 'Content 9' is present."
+  },
+  {
+    "id": "C06",
+    "name": "JSON state round-trip",
+    "difficulty": "medium",
+    "description": "Write JSON data, read it back, modify, and save again.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "io",
+      "json",
+      "state"
+    ],
+    "reference_code": "import json\nimport os\ndata = {f'key_{i}': i * 2 for i in range(500)}\nwith open('c06_state.json', 'w') as f:\n    json.dump(data, f)\nwith open('c06_state.json', 'r') as f:\n    loaded = json.load(f)\nfor i in range(100):\n    loaded[f'key_{i}'] = 'modified'\nwith open('c06_state.json', 'w') as f:\n    json.dump(loaded, f)\nwith open('c06_state.json', 'r') as f:\n    final = json.load(f)\nprint(f'Key 50: {final[\"key_50\"]}')\nprint(f'Key 200: {final[\"key_200\"]}')\nos.remove('c06_state.json')",
+    "expected_output": "Key 50: modified\nKey 200: 400\n",
+    "prompt": "Create a dictionary with 500 keys (key_0 to key_499) where values are key*2. Save to 'c06_state.json', load it back, modify the first 100 values to 'modified', save again, reload, and print values for key_50 and key_200. Clean up the file."
+  },
+  {
+    "id": "C07",
+    "name": "Write and verify 1MB binary file",
+    "difficulty": "medium",
+    "description": "Create a large binary file and verify its integrity.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "io",
+      "binary",
+      "large"
+    ],
+    "reference_code": "import os\nimport random\n# Pseudo-random bytes but deterministic\nrandom.seed(42)\nchunk = bytes(random.choices(range(256), k=1024))\ndata = chunk * 1024 # 1MB\nwith open('c07_1mb.bin', 'wb') as f:\n    f.write(data)\nsize = os.path.getsize('c07_1mb.bin')\nwith open('c07_1mb.bin', 'rb') as f:\n    read_data = f.read()\nprint(f'Size match: {size == 1024 * 1024}')\nprint(f'Content match: {data == read_data}')\nos.remove('c07_1mb.bin')",
+    "expected_output": "Size match: True\nContent match: True\n",
+    "prompt": "Generate 1MB of pseudo-random binary data (deterministic with seed 42), write to 'c07_1mb.bin', read it back, and verify both the file size (1MB) and content integrity. Print True/False for both checks. Clean up."
+  },
+  {
+    "id": "C08",
+    "name": "Copy file in chunks",
+    "difficulty": "medium",
+    "description": "Manually copy a large file using buffered reads and writes.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "io",
+      "copy",
+      "binary"
+    ],
+    "reference_code": "import os\ndata = b'A' * (5 * 1024 * 1024) # 5MB\nwith open('c08_src.bin', 'wb') as f:\n    f.write(data)\nwith open('c08_src.bin', 'rb') as src, open('c08_dst.bin', 'wb') as dst:\n    while True:\n        chunk = src.read(64 * 1024)\n        if not chunk: break\n        dst.write(chunk)\nprint(f'Src size: {os.path.getsize(\"c08_src.bin\")}')\nprint(f'Dst size: {os.path.getsize(\"c08_dst.bin\")}')\nos.remove('c08_src.bin')\nos.remove('c08_dst.bin')",
+    "expected_output": "Src size: 5242880\nDst size: 5242880\n",
+    "prompt": "Create a 5MB file 'c08_src.bin' filled with 'A' bytes. Copy it to 'c08_dst.bin' using 64KB chunks (read 64KB, write 64KB in a loop). Print the sizes of both files. Clean up both files."
+  },
+  {
+    "id": "C09",
+    "name": "High-volume file creation",
+    "difficulty": "hard",
+    "description": "Create many files and aggregate data from all of them.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "io",
+      "high_volume"
+    ],
+    "reference_code": "import os\nimport shutil\nos.makedirs('c09_data', exist_ok=True)\nfor i in range(100):\n    with open(f'c09_data/f_{i}.txt', 'w') as f:\n        f.write(f'{i * 10}')\ntotal = 0\nfor i in range(100):\n    with open(f'c09_data/f_{i}.txt', 'r') as f:\n        total += int(f.read().strip())\nprint(f'Aggregate sum: {total}')\nshutil.rmtree('c09_data')",
+    "expected_output": "Aggregate sum: 49500\n",
+    "prompt": "Create directory 'c09_data' with 100 files named f_0.txt to f_99.txt, where file i contains the value i*10 as text. Read all files, sum their numeric values, print the total. Clean up the directory."
+  },
+  {
+    "id": "C10",
+    "name": "Recursive directory traversal",
+    "difficulty": "hard",
+    "description": "Create a deep directory tree and traverse it recursively.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "io",
+      "directory",
+      "recursive"
+    ],
+    "reference_code": "import os\nimport shutil\ndef build_tree(path, depth, branches):\n    if depth == 0: return\n    os.makedirs(path, exist_ok=True)\n    with open(os.path.join(path, f'data.txt'), 'w') as f:\n        f.write('X')\n    for i in range(branches):\n        build_tree(os.path.join(path, f'b_{i}'), depth - 1, branches)\nbase = 'c10_tree'\nbuild_tree(base, 4, 3)\nfile_count = 0\ndir_count = 0\nfor root, dirs, files in os.walk(base):\n    dir_count += 1\n    file_count += len(files)\nprint(f'Dirs: {dir_count}')\nprint(f'Files: {file_count}')\nshutil.rmtree(base)",
+    "expected_output": "Dirs: 40\nFiles: 40\n",
+    "prompt": "Create a recursive directory tree 'c10_tree' with depth 4 and 3 branches at each level. Each directory should contain a file 'data.txt' with content 'X'. Use os.walk to count total directories and files. Print both counts. Clean up."
+  },
+  {
+    "id": "C11",
+    "name": "Binary seek and overwrite",
+    "difficulty": "hard",
+    "description": "Use random access to modify specific bytes in a binary file.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "io",
+      "binary",
+      "seek"
+    ],
+    "reference_code": "import os\nwith open('c11_seek.bin', 'wb') as f:\n    f.write(b'\\x00' * 1024 * 1024)\nwith open('c11_seek.bin', 'r+b') as f:\n    f.seek(500000)\n    f.write(b'HELLO_WORLD')\nwith open('c11_seek.bin', 'rb') as f:\n    f.seek(500000)\n    check = f.read(11)\nprint(f'Found: {check.decode()}')\nos.remove('c11_seek.bin')",
+    "expected_output": "Found: HELLO_WORLD\n",
+    "prompt": "Create a 1MB file 'c11_seek.bin' filled with null bytes. Open in read+write binary mode, seek to position 500000, and overwrite with 'HELLO_WORLD'. Read back and verify the overwrite. Print what was found. Clean up."
+  },
+  {
+    "id": "C12",
+    "name": "Temporary file lifecycle",
+    "difficulty": "hard",
+    "description": "Create and manage multiple temporary files with proper cleanup.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "io",
+      "tempfile"
+    ],
+    "reference_code": "import tempfile\nimport os\nsuccess = 0\nfor i in range(50):\n    with tempfile.NamedTemporaryFile() as tmp:\n        tmp.write(f'temp_data_{i}'.encode())\n        tmp.flush()\n        os.fsync(tmp.fileno())\n        with open(tmp.name, 'rb') as f:\n            if f.read().decode() == f'temp_data_{i}':\n                success += 1\nprint(f'Successful temp lifecycles: {success}')",
+    "expected_output": "Successful temp lifecycles: 50\n",
+    "prompt": "Using tempfile.NamedTemporaryFile, create 50 temporary files. For each, write 'temp_data_{i}', flush and fsync, then read back and verify content. Count and print how many were successful."
+  }
+]

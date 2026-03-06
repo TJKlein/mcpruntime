@@ -13,34 +13,29 @@ except ImportError:
 class TestRecursiveAgentLive:
     
     @pytest.fixture
-    def agent(self, mock_config, temp_workspace, temp_servers, live_llm_client, live_llm_model_name):
-        """Create a RecursiveAgent instance with real Monty executor and real LLM."""
-        # Setup filesystem helper
+    def agent(self, mock_config, temp_workspace, temp_servers, live_llm_client, live_llm_model_name, live_app_config):
+        """Create a RecursiveAgent with real Monty and live LLM config from .env."""
         fs_helper = FilesystemHelper(
             workspace_dir=str(temp_workspace),
             servers_dir=str(temp_servers),
             skills_dir="./skills",
         )
         
-        # Setup Monty executor
         executor = MontyExecutor(
             execution_config=mock_config.execution,
             guardrail_config=mock_config.guardrails,
             optimization_config=mock_config.optimizations,
         )
         
-        # Enable LLM in config
-        mock_config.llm.enabled = True
-        
-        # Setup Agent
+        # Use live LLM config from .env so CodeGenerator and ask_llm get api_key, endpoint, etc.
+        llm_config = live_app_config.llm
         agent = RecursiveAgent(
             fs_helper=fs_helper,
             executor=executor,
             optimization_config=mock_config.optimizations,
-            llm_config=mock_config.llm,
+            llm_config=llm_config,
         )
         
-        # Inject real LLM client and model/deployment name (Azure needs deployment name)
         agent.code_generator._llm_client = live_llm_client
         agent.code_generator._model_name = live_llm_model_name
         

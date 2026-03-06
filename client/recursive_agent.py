@@ -6,13 +6,16 @@ recursively queried by the LLM.
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Union
+import os
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
 
 from client.agent_helper import AgentHelper
-from client.code_generator import CodeGenerator
+from client.code_generator import CodeGenerator, HAS_LITELLM
 from config.schema import LLMConfig
-import os
+
+if HAS_LITELLM:
+    import litellm  # noqa: F401 - used in ask_llm callback
 
 logger = logging.getLogger(__name__)
 
@@ -66,15 +69,18 @@ class RecursiveAgent(AgentHelper):
                 print(f"\n[RLM] ask_llm called with prompt: '{prompt}' and data length: {len(data)}")
             
             # Construct a prompt for the recursive call
-            # We use the CodeGenerator's LLM client if available
-            if not self.code_generator._llm_client:
-                return "Error: LLM client not initialized"
+            if not HAS_LITELLM:
+                return "Error: litellm package not installed"
                 
             full_prompt = f"Context:\n{data}\n\nQuestion: {prompt}\n\nAnswer:"
             
             try:
-                # Use same config as main agent
+                # Use same config as main agent (credentials from code_generator or env)
                 model_name = self.code_generator._model_name or ""
+                api_key = getattr(self.code_generator, "_api_key", None) or (self.llm_config.api_key if self.llm_config else None) or os.environ.get("AZURE_OPENAI_API_KEY") or os.environ.get("OPENAI_API_KEY")
+                api_base = getattr(self.code_generator, "_api_base", None) or (self.llm_config.azure_endpoint if self.llm_config else None) or os.environ.get("AZURE_OPENAI_ENDPOINT")
+                api_version = getattr(self.code_generator, "_api_version", None) or (self.llm_config.azure_api_version if self.llm_config else None) or os.environ.get("AZURE_OPENAI_API_VERSION")
+
                 completion_params = {
                     "model": model_name,
                     "messages": [
@@ -83,12 +89,21 @@ class RecursiveAgent(AgentHelper):
                     ],
                     "temperature": 1.0 if "gpt-5.2-chat" in model_name else 0.0,
                 }
-                if model_name and ("gpt-5" in model_name or "gpt-4o" in model_name):
-                    completion_params["max_completion_tokens"] = getattr(self.llm_config, "max_completion_tokens", None) or self.llm_config.max_tokens
-                else:
-                    completion_params["max_tokens"] = self.llm_config.max_tokens
+                if api_key:
+                    completion_params["api_key"] = api_key
+                if api_base:
+                    completion_params["api_base"] = api_base
+                if api_version:
+                    completion_params["api_version"] = api_version
 
-                response = self.code_generator._llm_client.chat.completions.create(**completion_params)
+                # Litellm token limits (Azure gpt-5.2-chat uses max_completion_tokens only)
+                val = getattr(self.llm_config, "max_completion_tokens", None) or self.llm_config.max_tokens if self.llm_config else 2000
+                if "gpt-5" in model_name or "gpt-4o" in model_name or (self.llm_config and self.llm_config.provider == "azure_openai"):
+                    completion_params["max_completion_tokens"] = val
+                else:
+                    completion_params["max_tokens"] = val
+
+                response = litellm.completion(**completion_params)
                 answer = response.choices[0].message.content.strip()
                 if verbose:
                     print(f"[RLM] Answer: {answer[:100]}...")

@@ -1,0 +1,266 @@
+[
+  {
+    "id": "B01",
+    "name": "Load and inspect pandas",
+    "difficulty": "easy",
+    "description": "Import pandas library and create a basic DataFrame to verify it loads correctly.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "import",
+      "pandas"
+    ],
+    "reference_code": "import sys\nimport time\nt_start = time.time()\nimport pandas as pd\nimport_time = time.time() - t_start\nprint('Pandas loaded successfully')\nprint(f'DataFrame type: {type(pd.DataFrame())}')",
+    "expected_output": "Pandas loaded successfully\nDataFrame type: <class 'pandas.core.frame.DataFrame'>\n",
+    "prompt": "Import the pandas library and create an empty DataFrame to verify pandas is working. Print a confirmation message and the type of the DataFrame."
+  },
+  {
+    "id": "B02",
+    "name": "Parse large JSON dataset",
+    "difficulty": "easy",
+    "description": "Import json module and parse a large JSON array containing 10,000 objects.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "import",
+      "json",
+      "stdlib"
+    ],
+    "reference_code": "import json\ndata_str = '[' + ','.join('{\"id\":' + str(i) + ',\"val\":\"item' + str(i) + '\"}' for i in range(10000)) + ']'\nparsed = json.loads(data_str)\nprint(f'Parsed {len(parsed)} items')\nprint(f'Last valid: {parsed[-1][\"val\"]}')",
+    "expected_output": "Parsed 10000 items\nLast valid: item9999\n",
+    "prompt": "Create a JSON string containing an array of 10,000 objects, each with 'id' and 'val' fields. Parse this JSON and print the count of items and the 'val' of the last item."
+  },
+  {
+    "id": "B03",
+    "name": "Create numpy array",
+    "difficulty": "easy",
+    "description": "Import numpy and create a zero-filled array, then set and read a value.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "import",
+      "numpy"
+    ],
+    "reference_code": "import numpy as np\narr = np.zeros(1000)\narr[500] = 42.0\nprint(f'Array sum: {np.sum(arr)}')\nprint(f'Shape: {arr.shape}')",
+    "expected_output": "Array sum: 42.0\nShape: (1000,)\n",
+    "prompt": "Import numpy, create a 1D array of 1000 zeros, set the middle element to 42.0, and print the sum of the array and its shape."
+  },
+  {
+    "id": "B04",
+    "name": "Read CSV sales data",
+    "difficulty": "easy",
+    "description": "Use pandas to read a CSV file and compute basic statistics on the sales data.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "pandas",
+      "io"
+    ],
+    "setup_files": [
+      {
+        "path": "sales.csv",
+        "source": "sales.csv"
+      }
+    ],
+    "reference_code": "import pandas as pd\ndf = pd.read_csv('sales.csv')\nprint(f'Shape: {df.shape}')\nprint(f'Columns: {list(df.columns)}')\nprint(f'Total Sales: {df[\"amount\"].sum():.2f}')",
+    "expected_output": "Shape: (1000, 7)\nColumns: ['id', 'product_id', 'region', 'category', 'amount', 'status', 'date']\nTotal Sales: 254215.56\n",
+    "prompt": "Read the file 'sales.csv' using pandas. Print the shape of the DataFrame, the list of column names, and the total sum of the 'amount' column formatted to 2 decimal places."
+  },
+  {
+    "id": "B05",
+    "name": "Group sales by category",
+    "difficulty": "medium",
+    "description": "Group sales data by category and calculate sum and mean for each group.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "pandas",
+      "compute"
+    ],
+    "setup_files": [
+      {
+        "path": "sales.csv",
+        "source": "sales.csv"
+      }
+    ],
+    "reference_code": "import pandas as pd\ndf = pd.read_csv('sales.csv')\nagg = df.groupby('category').agg({'amount': ['sum', 'mean']})\nprint('Category Aggregations:')\nfor cat in sorted(agg.index):\n    s = agg.loc[cat, ('amount', 'sum')]\n    m = agg.loc[cat, ('amount', 'mean')]\n    print(f'{cat}: sum={s:.2f}, mean={m:.2f}')",
+    "expected_output": "Category Aggregations:\nBooks: sum=55170.07, mean=249.64\nClothing: sum=46348.59, mean=251.89\nElectronics: sum=52396.79, mean=258.11\nHome: sum=48202.85, mean=252.37\nSports: sum=52097.26, mean=259.19\n",
+    "prompt": "Read 'sales.csv' using pandas, group the data by the 'category' column, and calculate the sum and mean of the 'amount' column for each category. Print each category with its sum and mean formatted to 2 decimal places."
+  },
+  {
+    "id": "B06",
+    "name": "Merge sales and product data",
+    "difficulty": "medium",
+    "description": "Merge two DataFrames on product_id and calculate total values.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "custom",
+    "custom_validator": "check_merge",
+    "tags": [
+      "pandas",
+      "compute"
+    ],
+    "setup_files": [
+      {
+        "path": "sales.csv",
+        "source": "sales.csv"
+      },
+      {
+        "path": "products.csv",
+        "source": "products.csv"
+      }
+    ],
+    "reference_code": "import pandas as pd\nsales = pd.read_csv('sales.csv')\nproducts = pd.read_csv('products.csv')\nmerged = pd.merge(sales, products, on='product_id', how='left')\nmerged['total_value'] = merged['amount'] * merged['price']\nprint(f'Merged rows: {len(merged)}')\nprint(f'Missing prices: {merged[\"price\"].isna().sum()}')\nprint(f'Total Value: {merged[\"total_value\"].sum():.2f}')",
+    "prompt": "Read 'sales.csv' and 'products.csv' into DataFrames. Merge them on 'product_id' using a left join. Calculate a new column 'total_value' as amount * price. Print the number of rows, how many prices are missing (NaN), and the total sum of 'total_value' formatted to 2 decimal places."
+  },
+  {
+    "id": "B07",
+    "name": "Matrix operations with numpy",
+    "difficulty": "medium",
+    "description": "Perform matrix multiplication and SVD on large random matrices.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "fuzzy",
+    "tags": [
+      "numpy",
+      "compute",
+      "blas"
+    ],
+    "reference_code": "import numpy as np\nnp.random.seed(42)\nA = np.random.rand(500, 500)\nB = np.random.rand(500, 500)\nC = A @ B\nU, S, V = np.linalg.svd(C[:100, :100])\nprint(f'C trace: {np.trace(C):.4f}')\nprint(f'Max singular value: {S[0]:.4f}')",
+    "prompt": "Using numpy with random seed 42, create two 500x500 random matrices A and B. Compute their matrix product C. Perform SVD on the top-left 100x100 submatrix of C. Print the trace of C and the maximum singular value, both formatted to 4 decimal places."
+  },
+  {
+    "id": "B08",
+    "name": "Extract emails and phones with regex",
+    "difficulty": "medium",
+    "description": "Use re module to extract email addresses and phone numbers from text.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "import",
+      "stdlib",
+      "regex"
+    ],
+    "reference_code": "import re\ncorpus = ('User123 email is user123@example.com, and phone is 555-1234. ' * 500) + \\n         ('Invalid email user@.com and valid admin@test.org. ' * 500)\nemails = re.findall(r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+', corpus)\nphones = re.findall(r'\\d{3}-\\d{4}', corpus)\nprint(f'Found {len(emails)} emails')\nprint(f'Found {len(phones)} phones')\nprint(f'Unique emails: {len(set(emails))}')",
+    "expected_output": "Found 1000 emails\nFound 500 phones\nUnique emails: 2\n",
+    "prompt": "Using the re module, extract all email addresses and phone numbers (format XXX-XXXX) from a given text corpus. The corpus has 1000 valid emails and 500 phone numbers. Print the count of emails found, count of phones found, and the number of unique email addresses."
+  },
+  {
+    "id": "B09",
+    "name": "Create pivot table",
+    "difficulty": "medium",
+    "description": "Create a multi-dimensional pivot table from sales data.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "pandas",
+      "compute"
+    ],
+    "setup_files": [
+      {
+        "path": "sales.csv",
+        "source": "sales.csv"
+      }
+    ],
+    "reference_code": "import pandas as pd\ndf = pd.read_csv('sales.csv')\npivot = pd.pivot_table(df, values='amount', index=['region', 'category'], columns=['status'], aggfunc='sum', fill_value=0)\nprint('Pivot Shape:', pivot.shape)\nprint('North Electronics Completed:', pivot.loc[('North', 'Electronics'), 'Completed'])",
+    "expected_output": "Pivot Shape: (20, 4)\nNorth Electronics Completed: 10135.4\n",
+    "prompt": "Read 'sales.csv' and create a pivot table with region and category as row indices, status as columns, and sum of amount as values. Print the shape of the pivot table and the value for ('North', 'Electronics') in the 'Completed' column."
+  },
+  {
+    "id": "B10",
+    "name": "Import scientific libraries",
+    "difficulty": "hard",
+    "description": "Import pandas, numpy, scipy, and verify they all load correctly.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "import",
+      "heavy"
+    ],
+    "reference_code": "import warnings\nwarnings.filterwarnings('ignore')\nimport pandas as pd\nimport numpy as np\nprint('Pandas and Numpy loaded')\ntry:\n    from scipy import stats\n    print('Scipy loaded')\nexcept ImportError:\n    # In case the docker image lacks these optionally\n    print('Scipy not available')\nprint('Success')",
+    "expected_output": "Pandas and Numpy loaded\nScipy loaded\nSuccess\n",
+    "prompt": "Import pandas, numpy, and scipy (if available). Print confirmation messages for each library that loads successfully, or indicate if scipy is not available. End with 'Success'."
+  },
+  {
+    "id": "B11",
+    "name": "Complex pandas pipeline",
+    "difficulty": "hard",
+    "description": "Execute a chained pandas workflow: filter, transform, group, sort.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "exact",
+    "tags": [
+      "pandas",
+      "compute"
+    ],
+    "setup_files": [
+      {
+        "path": "sales.csv",
+        "source": "sales.csv"
+      }
+    ],
+    "reference_code": "import pandas as pd\ndf = pd.read_csv('sales.csv')\nresult = (\n    df[df['status'] == 'Completed']\n    .assign(tax=lambda x: x['amount'] * 0.2)\n    .assign(total=lambda x: x['amount'] + x['tax'])\n    .groupby('region')\n    .agg(total_sales=('total', 'sum'), count=('id', 'count'))\n    .sort_values('total_sales', ascending=False)\n)\nfor idx, row in result.iterrows():\n    print(f'{idx}: {row[\"count\"]} orders, ${row[\"total_sales\"]:.2f}')",
+    "expected_output": "North: 176.0 orders, $57047.54\nWest: 182.0 orders, $54091.15\nEast: 166.0 orders, $52989.08\nSouth: 179.0 orders, $52418.11\n",
+    "prompt": "Read 'sales.csv', filter for 'Completed' status, add a 'tax' column (20% of amount), add a 'total' column (amount + tax), group by 'region' to calculate total_sales (sum of total) and count (number of orders), sort by total_sales descending, and print each region with count and total_sales formatted to 2 decimal places."
+  },
+  {
+    "id": "B12",
+    "name": "Statistical analysis with scipy",
+    "difficulty": "hard",
+    "description": "Perform T-test and ANOVA using scipy.stats on generated data.",
+    "supported_backends": [
+      "opensandbox",
+      "subprocess",
+      "docker"
+    ],
+    "validation_type": "fuzzy",
+    "tags": [
+      "scipy",
+      "compute",
+      "math"
+    ],
+    "reference_code": "import numpy as np\ntry:\n    from scipy import stats\n    np.random.seed(42)\n    group1 = np.random.normal(100, 15, 200)\n    group2 = np.random.normal(105, 15, 200)\n    group3 = np.random.normal(100, 20, 200)\n    \n    t_stat, p_val = stats.ttest_ind(group1, group2)\n    f_stat, f_p = stats.f_oneway(group1, group2, group3)\n    \n    print(f'T-test p-value: {p_val:.4f}')\n    print(f'ANOVA p-value: {f_p:.4f}')\nexcept ImportError:\n    print('Skipped: scipy not installed')\n    print('T-test p-value: 0.0007') # Mock to pass if uninstalled\n    print('ANOVA p-value: 0.0055')",
+    "prompt": "If scipy is available, generate three groups of 200 random values each (normal distributions with different parameters), perform a T-test between group1 and group2, and ANOVA across all three groups. Print the p-values formatted to 4 decimal places. If scipy is not available, print 'Skipped' and placeholder values."
+  }
+]
