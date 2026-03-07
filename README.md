@@ -57,6 +57,8 @@ python -m benchmarks run --backend opensandbox --llm-provider openai --approach 
 
 ### Charts & Visualizations
 
+*All benchmark results and charts below were obtained with **GPT-5.2**. Run the benchmark with your own LLM to reproduce or compare.*
+
 **PTC vs Function Calling**
 
 ![PTC vs FC Comparison](assets/ptc_vs_fc_comparison.png)
@@ -133,7 +135,7 @@ python examples/00_simple_api.py
 ![Benchmark Demo](assets/benchmark_demo.gif)
 *Run `python -m benchmarks run --approach both` to compare PTC vs FC with your LLM provider*
 
-**PTC-Bench** delivers exceptional performance across execution backends and tool-calling paradigms.
+**PTC-Bench** delivers exceptional performance across execution backends and tool-calling paradigms. The numbers and charts in this section reflect runs with **GPT-5.2**; your results may vary with other models.
 
 ### Backend Performance Comparison
 

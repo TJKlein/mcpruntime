@@ -70,7 +70,7 @@ from client.opensandbox_executor import OpenSandboxExecutor as _OpenSandboxExecu
 from config.loader import load_config as _load_config
 from config.schema import AppConfig as _AppConfig, OptimizationConfig
 
-__version__ = "0.1.1"
+__version__ = "0.1.7"
 
 __all__ = [
     # Main API

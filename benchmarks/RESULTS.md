@@ -4,6 +4,8 @@
 
 This document explains how to interpret results from the benchmark comparison of **Programmatic Tool Calling (PTC)** vs **Function Calling (FC)**.
 
+The benchmark results and charts shown in the main README were obtained with **GPT-5.2**. Results will vary with other models.
+
 ## Running the Benchmark
 
 PTC-Bench has **60 PTC tasks** (easy / medium / hard). To generate results for reports and graphics:
