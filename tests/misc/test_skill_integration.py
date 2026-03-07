@@ -335,15 +335,13 @@ except ImportError as e:
         print("Skills are fully functional in the sandbox environment!")
         print()
         
-        return True
-        
     except AssertionError as e:
         print()
         print("=" * 60)
         print("❌ INTEGRATION TEST FAILED")
         print("=" * 60)
         print(f"Error: {e}")
-        return False
+        raise
         
     except Exception as e:
         print()
@@ -353,9 +351,12 @@ except ImportError as e:
         print(f"Unexpected error: {e}")
         import traceback
         traceback.print_exc()
-        return False
+        raise
 
 
 if __name__ == "__main__":
-    success = test_skill_sandbox_integration()
-    sys.exit(0 if success else 1)
+    try:
+        test_skill_sandbox_integration()
+        sys.exit(0)
+    except Exception:
+        sys.exit(1)

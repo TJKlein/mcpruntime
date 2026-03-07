@@ -284,15 +284,13 @@ def merge_csv_files(input_files, output_file):
         print(f"  - SKILLS.md registry: ✓")
         print()
         
-        return True
-        
     except AssertionError as e:
         print()
         print("=" * 60)
         print("❌ TEST FAILED")
         print("=" * 60)
         print(f"Error: {e}")
-        return False
+        raise
         
     except Exception as e:
         print()
@@ -302,7 +300,7 @@ def merge_csv_files(input_files, output_file):
         print(f"Unexpected error: {e}")
         import traceback
         traceback.print_exc()
-        return False
+        raise
         
     finally:
         # Cleanup
@@ -314,5 +312,8 @@ def merge_csv_files(input_files, output_file):
 
 
 if __name__ == "__main__":
-    success = test_skill_manager()
-    sys.exit(0 if success else 1)
+    try:
+        test_skill_manager()
+        sys.exit(0)
+    except Exception:
+        sys.exit(1)

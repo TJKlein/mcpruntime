@@ -7,12 +7,21 @@ exposes ask_llm via a small HTTP server on the host that the container calls.
 import pytest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
+
+# Skip entire module if opensandbox not installed (executor.execute() would raise)
+try:
+    from opensandbox.sandbox import Sandbox as _Sandbox
+except ImportError:
+    _Sandbox = None
+
+from client.code_generator import HAS_LITELLM
 from client.recursive_agent import RecursiveAgent
 from client.opensandbox_executor import OpenSandboxExecutor
 from client.filesystem_helpers import FilesystemHelper
 from client.base import ExecutionResult
 
 
+@pytest.mark.skipif(_Sandbox is None, reason="opensandbox not installed")
 class TestRecursiveAgentIntegration:
 
     @pytest.fixture
@@ -42,7 +51,8 @@ class TestRecursiveAgentIntegration:
 
         return agent
 
-    @patch("client.recursive_agent.litellm.completion")
+    @pytest.mark.skipif(not HAS_LITELLM, reason="litellm not installed")
+    @patch("litellm.completion")
     def test_infinite_context_search(self, mock_litellm_completion, agent, tmp_path, mock_llm_client):
         """Test RLM infinite context search: CONTEXT_DATA and ask_llm are injected by OpenSandbox."""
         context_file = tmp_path / "large_log.txt"
@@ -96,7 +106,8 @@ print(f"Result: {res}")
         assert result == ExecutionResult.SUCCESS
         assert "Result: 50" in output
 
-    @patch("client.recursive_agent.litellm.completion")
+    @pytest.mark.skipif(not HAS_LITELLM, reason="litellm not installed")
+    @patch("litellm.completion")
     def test_context_limit_comparison(self, mock_litellm_completion, agent, tmp_path, mock_llm_client):
         """Verify RLM succeeds where standard approach fails due to context limits."""
         large_content = "A" * 2000 + "SECRET_CODE"
