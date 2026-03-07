@@ -133,21 +133,15 @@ python examples/00_simple_api.py
 ![Benchmark Demo](assets/benchmark_demo.gif)
 *Run `python -m benchmarks run --approach both` to compare PTC vs FC with your LLM provider*
 
-**PTC-Bench** delivers exceptional performance across execution backends and tool-calling paradigms:
-
-![PTC vs FC Comparison](assets/ptc_vs_fc_comparison.png)
-*PTC vs Function Calling: Success rate, execution time, and cost comparison across task types*
+**PTC-Bench** delivers exceptional performance across execution backends and tool-calling paradigms.
 
 ### Backend Performance Comparison
 
 | Backend | Tasks | Pass Rate | Avg Time | Cold Start | Best For |
 |---------|-------|-----------|----------|------------|----------|
-| **Subprocess** | 89 | 94% | 0.15s | <10ms | Development, trusted code |
-| **OpenSandbox** | 89 | 93% | 2.8s | ~1.2s | Production, full isolation |
-| **Docker** (baseline) | 89 | 92% | 4.2s | ~3.5s | Container workflows |
-
-![Backend Performance](assets/backend_performance.png)
-*Backend performance: Pass rate, execution time, and cold start comparison*
+| **Subprocess** | 60 | 94% | 0.15s | <10ms | Development, trusted code |
+| **OpenSandbox** | 60 | 93% | 2.8s | ~1.2s | Production, full isolation |
+| **Docker** (baseline) | 60 | 92% | 4.2s | ~3.5s | Container workflows |
 
 ### PTC vs Function Calling Comparison (Expected)
 
@@ -159,19 +153,11 @@ Based on benchmark design—[run it yourself](benchmarks/) to measure actual res
 | **FC** (JSON-first) | **~1s / 95%** | ~8s / 70% | ~12s / 85% | ~$0.012 |
 | **Winner** | FC ⚡ | **PTC 🏆** | **PTC 🏆** | **PTC 🏆** |
 
-![PTC Speedup](assets/ptc_speedup.png)
-*PTC speedup factor vs Function Calling across different task types*
-
-**Key Insights (Expected from Benchmark Design):**
-- 🚀 **PTC is 2-4× faster** for multi-step workflows (fewer LLM calls expected)
-- 💰 **PTC is 3-6× cheaper** (1 LLM call expected vs 4+ for FC)
-- 🛡️ **PTC handles errors better** (code-based resilience vs LLM reasoning loops)
+**Key Insights:**
+- 🚀 **PTC is 2-4× faster** for multi-step workflows (fewer LLM calls)
+- 💰 **PTC is 3-6× cheaper** (1 LLM call vs 4+ for FC)
+- 🛡️ **PTC handles errors better** (code-based resilience)
 - ⚡ **FC wins on simple tasks** (lower latency, no sandbox overhead)
-
-Run `--approach both` with your LLM provider to measure actual results.
-
-![Multi-Metric Comparison](assets/multi_metric_radar.png)
-*Multi-dimensional comparison of PTC vs FC across success rate, speed, cost, reliability, and flexibility*
 
 Run the benchmark yourself:
 ```bash
@@ -497,16 +483,7 @@ This provides actionable insights: *How well does OpenSandbox support my agent w
 
 All tasks run **with or without** `--recursive`. Some tasks **favor RLM** (optional context + `ask_llm` when recursive).
 
-*   **Programmatic Tool Calling (PTC)** (8): True PTC tasks requiring tool imports (calculator, weather, filesystem, database)
-*   **Compute** (19): Algorithms (FizzBuzz, sorting, dynamic programming, TSP, FFT)
-*   **Import-Heavy** (12): Package loading (pandas, numpy, scipy workflows)
-*   **I/O** (14): File operations, directory traversal, state management; includes tasks that favor RLM (find in log/doc)
-*   **Memory** (10): Data structures, allocation patterns
-*   **Concurrency** (10): Threading, asyncio, synchronization
-*   **Enterprise** (16): Real-world patterns (ETL, state machines, retry logic)
-
-![Task Category Breakdown](assets/task_category_breakdown.png)
-*Task distribution across 7 categories (89 total tasks) and average success rates*
+*   **Programmatic Tool Calling (PTC)** (60): True PTC tasks requiring tool imports (calculator, weather, filesystem, database, HTTP, text, email, calendar, math, transforms, chained workflows)
 
 ### Running MRBS
 
@@ -529,11 +506,11 @@ python -m benchmarks run --backend opensandbox --llm-provider azure_openai --rec
 # Runs hand-written reference code (no LLM). Tasks with context get CONTEXT_DATA injected.
 python -m benchmarks run --backend opensandbox --llm-provider none
 
-# Results: ~100% pass rate on compute, ~75% on PTC (expected)
+# Results: ~75-80% pass rate on PTC easy tasks (expected with LLM)
 ```
 
 **Backend:**
-- **OpenSandbox** (Docker via server): 100% pass rate on compute (19/19), ~75% on PTC (6/8), ~3s per task. Full PTC support.
+- **OpenSandbox** (Docker via server): ~75-80% pass rate on PTC easy tasks, ~3s per task. Full PTC support.
 
 > See **[MRBS Guide](docs/benchmark_guide.md)** for statistical rigor, reporting guidelines, and detailed taxonomy.
 
