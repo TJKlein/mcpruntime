@@ -402,9 +402,9 @@ make test-e2e       # E2E with real LLM (requires .env)
 make test-all       # Full suite
 ```
 
-Without Make: `pytest tests/ -v -m "not live"` for unit+integration; `pytest tests/e2e/ -v` for live E2E (requires `.env`).
+Without Make: `python -m pytest tests/ -v -m "not live"` for unit+integration; `python -m pytest tests/e2e/ -v` for live E2E (requires `.env`).
 
-## 11. References & Inspiration
+## 12. References & Inspiration
 
 MCPRuntime stands on the shoulders of giants.
 
