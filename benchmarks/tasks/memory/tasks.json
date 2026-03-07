@@ -6,7 +6,7 @@
     "description": "Allocate a large list of integers and compute its sum.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -24,7 +24,7 @@
     "description": "Create a dictionary with many entries and perform lookups.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -43,7 +43,7 @@
     "description": "Create large sets and compute union, intersection, and difference.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -61,7 +61,7 @@
     "description": "Compare different methods of building a large string.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -79,7 +79,7 @@
     "description": "Create a deeply nested dictionary structure recursively.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -98,7 +98,7 @@
     "description": "Create a large 2D list (matrix) and access elements.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -117,7 +117,7 @@
     "description": "Compare memory usage patterns of generators vs lists.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -135,7 +135,7 @@
     "description": "Instantiate a large number of simple objects.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -154,7 +154,7 @@
     "description": "Use copy.deepcopy on a complex nested data structure.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -172,7 +172,7 @@
     "description": "Sort a large list of complex tuples by multiple keys.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [

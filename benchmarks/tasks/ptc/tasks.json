@@ -6,7 +6,7 @@
     "description": "Use the calculator tool to sum a list of numbers. Tests basic tool import and calling.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -31,7 +31,7 @@
     "description": "Use the calculator to evaluate a complex expression. Tests expression parsing via tool.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "fuzzy",
     "tags": [
@@ -56,7 +56,7 @@
     "description": "Use the weather tool to get temperature for a location. Tests API-style tool calling.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "custom",
     "custom_validator": "validate_weather_output",
@@ -83,7 +83,7 @@
     "description": "Use filesystem tool to read a file and process its contents. Tests I/O tool calling.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -113,7 +113,7 @@
     "description": "Use database tool to query records and aggregate results. Tests database tool calling.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "custom",
     "custom_validator": "validate_database_output",
@@ -140,7 +140,7 @@
     "description": "Use multiple tools together to solve a problem. Tests tool composition.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "custom",
     "custom_validator": "validate_multi_tool_output",
@@ -168,7 +168,7 @@
     "description": "List directory contents and process each file. Tests directory traversal via tools.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -206,7 +206,7 @@
     "description": "Get forecast, extract data, calculate statistics using multiple tool calls. Tests complex PTC workflows.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "custom",
     "custom_validator": "validate_forecast_analysis",

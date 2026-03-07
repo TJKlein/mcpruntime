@@ -43,7 +43,7 @@ def mock_config():
             temperature=0.0
         ),
         execution=ExecutionConfig(
-            sandbox_type="monty", # Default for unit tests (faster)
+            sandbox_type="opensandbox", # Default for unit tests
             timeout=30
         ),
         optimizations=OptimizationConfig(

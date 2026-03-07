@@ -6,7 +6,7 @@
     "description": "Create a text file with multiple lines and read it back to verify contents.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -24,7 +24,7 @@
     "description": "Create a multi-level directory hierarchy.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -42,7 +42,7 @@
     "description": "Repeatedly open, append, and close a file to simulate logging.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -60,7 +60,7 @@
     "description": "Create multiple files and count them by listing the directory.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -78,7 +78,7 @@
     "description": "Create multiple files, read them all, and combine their contents.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -96,7 +96,7 @@
     "description": "Write JSON data, read it back, modify, and save again.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -115,7 +115,7 @@
     "description": "Create a large binary file and verify its integrity.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -134,7 +134,7 @@
     "description": "Manually copy a large file using buffered reads and writes.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -153,7 +153,7 @@
     "description": "Create many files and aggregate data from all of them.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -171,7 +171,7 @@
     "description": "Create a deep directory tree and traverse it recursively.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -190,7 +190,7 @@
     "description": "Use random access to modify specific bytes in a binary file.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -209,7 +209,7 @@
     "description": "Create and manage multiple temporary files with proper cleanup.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -219,5 +219,35 @@
     "reference_code": "import tempfile\nimport os\nsuccess = 0\nfor i in range(50):\n    with tempfile.NamedTemporaryFile() as tmp:\n        tmp.write(f'temp_data_{i}'.encode())\n        tmp.flush()\n        os.fsync(tmp.fileno())\n        with open(tmp.name, 'rb') as f:\n            if f.read().decode() == f'temp_data_{i}':\n                success += 1\nprint(f'Successful temp lifecycles: {success}')",
     "expected_output": "Successful temp lifecycles: 50\n",
     "prompt": "Using tempfile.NamedTemporaryFile, create 50 temporary files. For each, write 'temp_data_{i}', flush and fsync, then read back and verify content. Count and print how many were successful."
+  },
+  {
+    "id": "C13",
+    "name": "Find ERROR line in log (favors RLM)",
+    "difficulty": "easy",
+    "description": "Search provided context for the line containing ERROR. CONTEXT_DATA is injected; solvable by scanning or by chunked reasoning (ask_llm). Runs with or without --recursive.",
+    "supported_backends": ["opensandbox", "subprocess"],
+    "validation_type": "exact",
+    "tags": ["io", "search", "favors_rlm"],
+    "context_data_source": "large_log.txt",
+    "reference_code": "for line in CONTEXT_DATA.split('\\n'):\n    if 'ERROR' in line:\n        print(line)\n        break",
+    "expected_output": "ERROR 2024-01-15 10:15:33 PAYMENT_GATEWAY_TIMEOUT\n",
+    "prompt": "The variable CONTEXT_DATA contains log text. Find and print the line that contains 'ERROR'. You may scan CONTEXT_DATA directly or, if ask_llm is available, use it to reason over chunks. Print only that line.",
+    "max_retries": 3,
+    "timeout": 60
+  },
+  {
+    "id": "C14",
+    "name": "Find secret code in document (favors RLM)",
+    "difficulty": "easy",
+    "description": "Find the secret code in provided context. CONTEXT_DATA is injected; solvable by scanning or by chunked reasoning. Runs with or without --recursive.",
+    "supported_backends": ["opensandbox", "subprocess"],
+    "validation_type": "exact",
+    "tags": ["io", "search", "favors_rlm"],
+    "context_data_source": "doc_with_secret.txt",
+    "reference_code": "if 'ALPHA-BRAVO-99' in CONTEXT_DATA:\n    print('ALPHA-BRAVO-99')",
+    "expected_output": "ALPHA-BRAVO-99\n",
+    "prompt": "The variable CONTEXT_DATA contains a document. Find and print the secret code that looks like ALPHA-BRAVO-99. You may search CONTEXT_DATA directly or use ask_llm over chunks if available. Print only the code.",
+    "max_retries": 3,
+    "timeout": 60
   }
 ]

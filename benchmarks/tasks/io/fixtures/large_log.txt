@@ -1,0 +1,10 @@
+INFO 2024-01-15 10:00:00 Service started
+INFO 2024-01-15 10:00:01 Loading config
+INFO 2024-01-15 10:00:02 Database connected
+INFO 2024-01-15 10:01:00 Request /api/health 200
+INFO 2024-01-15 10:02:00 Request /api/users 200
+WARN 2024-01-15 10:05:00 High memory usage 85%
+INFO 2024-01-15 10:10:00 Request /api/orders 200
+ERROR 2024-01-15 10:15:33 PAYMENT_GATEWAY_TIMEOUT
+INFO 2024-01-15 10:15:34 Retry scheduled
+INFO 2024-01-15 10:20:00 Request /api/health 200

@@ -39,12 +39,14 @@ def main():
     run_parser.add_argument("--output", type=str, help="Save report to file")
     
     # LLM Settings (Agent Mode)
-    run_parser.add_argument("--llm-provider", type=str, default="openai", 
-                           choices=["openai", "anthropic", "google", "azure_openai", "none"], 
+    run_parser.add_argument("--llm-provider", type=str, default="openai",
+                           choices=["openai", "anthropic", "google", "azure_openai", "none"],
                            help="LLM Provider for agent code generation. Default: openai. Use 'none' for baseline mode (reference code only).")
-    run_parser.add_argument("--llm-model", type=str, default="gpt-4o", 
+    run_parser.add_argument("--llm-model", type=str, default="gpt-4o",
                            help="LLM Model name (default: gpt-4o). For Azure, this is the deployment name.")
-    
+    run_parser.add_argument("--recursive", action="store_true",
+                           help="Enable RLM (Recursive Language Model) for tasks with context_data: use RecursiveAgent and ask_llm. Without this, RLM tasks are skipped in LLM mode.")
+
     # COMPARE command
     cmp_parser = subparsers.add_parser("compare", help="Compare multiple backends")
     cmp_parser.add_argument("--backends", type=str, required=True, help="Comma-separated list of backends")
@@ -61,11 +63,13 @@ def main():
                            help="LLM Provider for agent code generation. Default: openai. Use 'none' for baseline mode.")
     cmp_parser.add_argument("--llm-model", type=str, default="gpt-4o",
                            help="LLM Model name (default: gpt-4o).")
-    
+    cmp_parser.add_argument("--recursive", action="store_true",
+                           help="Enable RLM for tasks with context_data (both control and test).")
+
     # DEBUG command
     dbg_parser = subparsers.add_parser("debug", help="Debug a single task")
     dbg_parser.add_argument("--task", type=str, required=True, help="Task ID (e.g. compute_001)")
-    dbg_parser.add_argument("--backend", type=str, default="monty", help="Backend to run on")
+    dbg_parser.add_argument("--backend", type=str, default="opensandbox", help="Backend to run on")
     
     args = parser.parse_args()
     
@@ -119,10 +123,11 @@ def main():
             if not ensure_opensandbox_server():
                 sys.exit(1)
         runner = BenchmarkRunner(
-            backend=args.backend, 
-            n_runs=args.runs, 
+            backend=args.backend,
+            n_runs=args.runs,
             cold_start=not args.warm,
-            llm_config=llm_config
+            llm_config=llm_config,
+            use_rlm=getattr(args, "recursive", False),
         )
         tasks = runner.load_tasks(categories, difficulties, tags)
         
@@ -165,7 +170,8 @@ def main():
         
         # Run Control
         print(f"\n--- Running Control: {control_backend} ---")
-        control_runner = BenchmarkRunner(backend=control_backend, n_runs=args.runs, llm_config=llm_config)
+        use_rlm = getattr(args, "recursive", False)
+        control_runner = BenchmarkRunner(backend=control_backend, n_runs=args.runs, llm_config=llm_config, use_rlm=use_rlm)
         tasks = control_runner.load_tasks(categories, difficulties, tags)
         if not tasks:
             print("No tasks found matching criteria.")
@@ -175,7 +181,7 @@ def main():
         
         # Run Test
         print(f"\n--- Running Test: {test_backend} ---")
-        test_runner = BenchmarkRunner(backend=test_backend, n_runs=args.runs, llm_config=llm_config)
+        test_runner = BenchmarkRunner(backend=test_backend, n_runs=args.runs, llm_config=llm_config, use_rlm=use_rlm)
         test_results = test_runner.run_suite(tasks)
         test_metrics = compute_metrics(test_results)
         

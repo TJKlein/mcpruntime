@@ -5,7 +5,7 @@ from benchmarks.validators import Validator
 
 def test_exact_validator_match():
     task = Task(id="test01", name="t", category="compute", difficulty="easy", description="", 
-                supported_backends=["monty"], validation_type="exact", tags=[], 
+                supported_backends=["opensandbox"], validation_type="exact", tags=[], 
                 reference_code="print('A')", expected_output="A\\n")
     
     # Validator strips trailing whitespace internally and expects stripped answer
@@ -18,7 +18,7 @@ def test_exact_validator_whitespace_tolerance():
     # Validator calls .strip() on both expected and actual output
     # Expected: 'Result' (stripped), actual: 'Result\n' (with trailing newline)
     task = Task(id="test02", name="t", category="compute", difficulty="easy", description="", 
-                supported_backends=["monty"], validation_type="exact", tags=[], 
+                supported_backends=["opensandbox"], validation_type="exact", tags=[], 
                 reference_code="print('Result')", expected_output="Result")
     
     # print() adds a trailing newline — after .strip() this should match 'Result'
@@ -27,7 +27,7 @@ def test_exact_validator_whitespace_tolerance():
 
 def test_exact_validator_mismatch():
     task = Task(id="test03", name="t", category="compute", difficulty="easy", description="", 
-                supported_backends=["monty"], validation_type="exact", tags=[], 
+                supported_backends=["opensandbox"], validation_type="exact", tags=[], 
                 reference_code="print('A')", expected_output="A")
     
     success, score, details = Validator.validate(task, "B\\n")
@@ -36,7 +36,7 @@ def test_exact_validator_mismatch():
 
 def test_fuzzy_validator_regex_match():
     task = Task(id="test04", name="t", category="compute", difficulty="easy", description="", 
-                supported_backends=["monty"], validation_type="fuzzy", tags=[], 
+                supported_backends=["opensandbox"], validation_type="fuzzy", tags=[], 
                 reference_code="import random; print(random.random())", expected_output="")
     
     # Example fuzzy output that has standard output components we want to find
@@ -48,7 +48,7 @@ def test_fuzzy_validator_regex_match():
 
 def test_custom_validator_missing():
     task = Task(id="test05", name="t", category="compute", difficulty="easy", description="", 
-                supported_backends=["monty"], validation_type="custom", tags=[], 
+                supported_backends=["opensandbox"], validation_type="custom", tags=[], 
                 reference_code="pass", custom_validator="non_existent_func", expected_output="")
                 
     success, score, details = Validator.validate(task, "output")

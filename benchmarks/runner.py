@@ -21,19 +21,21 @@ logger = logging.getLogger(__name__)
 
 class BenchmarkRunner:
     """Runs benchmark tasks across configured backends."""
-    
-    def __init__(self, backend: str, n_runs: int = 5, cold_start: bool = True, llm_config=None):
+
+    def __init__(self, backend: str, n_runs: int = 5, cold_start: bool = True, llm_config=None, use_rlm: bool = False):
         """Initialize runner.
-        
+
         Args:
-            backend: Sandbox backend ("docker", "opensandbox")
+            backend: Sandbox backend ("opensandbox", "subprocess")
             n_runs: Number of times to run each task (for statistical variance)
             cold_start: Whether to create a fresh sandbox for each run
             llm_config: Optional LLM configuration for agentic evaluation
+            use_rlm: If True, run RLM (Recursive Language Model) path for tasks with context_data_source
         """
         self.backend = backend.lower()
         self.n_runs = n_runs
         self.cold_start = cold_start
+        self.use_rlm = use_rlm
         self.config = load_config(Path(__file__).parent.parent / "config.yaml")
         self.llm_config = llm_config
         
@@ -120,6 +122,82 @@ class BenchmarkRunner:
         # Match executor: workspace is relative to project root
         return root
 
+    def _get_context_data_path(self, task: Task) -> Optional[Path]:
+        """Return path to context data fixture for RLM tasks, or None."""
+        if not getattr(task, "context_data_source", None):
+            return None
+        tasks_dir = Path(__file__).parent / "tasks"
+        fixture_path = tasks_dir / task.category / "fixtures" / task.context_data_source
+        return fixture_path if fixture_path.exists() else None
+
+    def _load_context_data(self, task: Task) -> Optional[str]:
+        """Load context data for RLM tasks from task's context_data_source fixture."""
+        path = self._get_context_data_path(task)
+        if path is None:
+            return None
+        try:
+            return path.read_text(encoding="utf-8")
+        except Exception as e:
+            logger.warning(f"Failed to read RLM context {path}: {e}")
+            return None
+
+    def _run_task_rlm(self, task: Task, executor, overall_start_time: float) -> TaskResult:
+        """Run a single RLM task via RecursiveAgent (LLM generates code using CONTEXT_DATA and ask_llm)."""
+        from client.recursive_agent import RecursiveAgent
+
+        context_path = self._get_context_data_path(task)
+        if context_path is None:
+            return TaskResult(
+                task_id=task.id, task_name=task.name, category=task.category, difficulty=task.difficulty,
+                success=False, score=0.0, execution_time=0.0, output="", error="RLM context fixture not found",
+                validation={}, backend=self.backend, timestamp=time.time(), skipped=False,
+            )
+
+        fs_helper = self.fs_helper
+        agent = RecursiveAgent(
+            fs_helper=fs_helper,
+            executor=executor,
+            optimization_config=self.config.optimizations,
+            llm_config=self.llm_config,
+        )
+        if self.code_generator and getattr(self.code_generator, "_llm_client", None):
+            agent.code_generator._llm_client = self.code_generator._llm_client
+            agent.code_generator._model_name = getattr(self.code_generator, "_model_name", None) or (self.llm_config.model if self.llm_config else None)
+
+        result, output_str, error_str = agent.execute_recursive_task(
+            task_description=task.prompt,
+            context_data=context_path,
+            verbose=False,
+        )
+        total_tts = time.time() - overall_start_time
+        output_str = str(output_str or "")
+        error_str = str(error_str) if error_str else None
+
+        if result == ExecutionResult.SUCCESS:
+            passed, score, details = Validator.validate(task, output_str)
+        else:
+            passed, score, details = False, 0.0, {"error": error_str or str(result)}
+
+        return TaskResult(
+            task_id=task.id,
+            task_name=task.name,
+            category=task.category,
+            difficulty=task.difficulty,
+            success=passed,
+            score=score,
+            execution_time=total_tts,
+            output=output_str,
+            error=error_str,
+            validation=details,
+            backend=self.backend,
+            timestamp=time.time(),
+            skipped=False,
+            iterations=1,
+            total_time=total_tts,
+            llm_generation_time=0.0,
+            final_error=error_str if not passed else None,
+        )
+
     def setup_workspace(self, task: Task) -> None:
         """Create setup files in the workspace directory."""
         # Resolve workspace relative to project root so it matches executor (opensandbox)
@@ -190,22 +268,58 @@ class BenchmarkRunner:
                 skipped=True,
                 skip_reason=f"Backend '{self.backend}' not in supported backends {task.supported_backends}"
             )
-            
+
+        # Same tasks run with or without recursive: RLM tasks get CONTEXT_DATA in both modes;
+        # with --recursive they also get ask_llm (RecursiveAgent path).
+        has_rlm_context = getattr(task, "context_data_source", None) is not None
+
         try:
             self.setup_workspace(task)
-            
+
             # Setup executor
             executor = self._create_executor() if self.cold_start else self._shared_executor
-            
+
             # Override guardrail max_execution_time for this task
             if hasattr(executor, 'guardrail_config') and executor.guardrail_config is not None:
                 executor.guardrail_config.max_execution_time = task.timeout + 2
-            
+
+            # --- RLM path: RecursiveAgent with context_data (LLM + use_rlm) ---
+            if has_rlm_context and self.use_rlm and self.code_generator and task.prompt:
+                return self._run_task_rlm(task, executor, overall_start_time=time.time())
+
+            # --- RLM baseline: run reference code with injected CONTEXT_DATA ---
+            if has_rlm_context and not self.code_generator:
+                context_content = self._load_context_data(task)
+                if context_content is None:
+                    return TaskResult(
+                        task_id=task.id, task_name=task.name, category=task.category, difficulty=task.difficulty,
+                        success=False, score=0.0, execution_time=0.0, output="", error="RLM context fixture not found",
+                        validation={}, backend=self.backend, timestamp=time.time(), skipped=False,
+                    )
+                exec_start = time.time()
+                result, output_str, error_str = executor.execute(
+                    task.reference_code,
+                    context={"inputs": {"CONTEXT_DATA": context_content}},
+                )
+                exec_time_total = time.time() - exec_start
+                output_str = str(output_str or "")
+                error_str = str(error_str) if error_str else None
+                if result == ExecutionResult.SUCCESS:
+                    passed, score, details = Validator.validate(task, output_str)
+                else:
+                    passed, score, details = False, 0.0, {"error": str(result)}
+                return TaskResult(
+                    task_id=task.id, task_name=task.name, category=task.category, difficulty=task.difficulty,
+                    success=passed, score=score, execution_time=exec_time_total, output=output_str, error=error_str,
+                    validation=details, backend=self.backend, timestamp=time.time(), skipped=False,
+                    iterations=1, total_time=exec_time_total, llm_generation_time=0.0, final_error=error_str if not passed else None,
+                )
+
             # Agent Loop: Generation -> Execution -> Validation
             overall_start_time = time.time()
             llm_gen_time_total = 0.0
             exec_time_total = 0.0
-            
+
             iteration = 0
             # Use LLM retries if generator available, otherwise single shot with reference code
             max_iterations = task.max_retries if self.code_generator and task.prompt else 1
@@ -214,13 +328,13 @@ class BenchmarkRunner:
             details = {}
             output_str = ""
             error_str = None
-            
+
             # Context for LLM retries
             previous_errors = []
-            
+
             while iteration < max_iterations and not passed:
                 iteration += 1
-                
+
                 # 1. Generation Phase (Agent generates code)
                 if self.code_generator and task.prompt:
                     # Natural language task - agent generates solution
@@ -257,9 +371,14 @@ class BenchmarkRunner:
                         error_str = "No prompt for LLM generation and no reference code available."
                         break
                 
-                # 2. Execution Phase
+                # 2. Execution Phase (inject CONTEXT_DATA for RLM tasks so same tasks run with/without --recursive)
                 exec_start = time.time()
-                result, output, error = executor.execute(code_to_run)
+                exec_context = None
+                if has_rlm_context:
+                    context_content = self._load_context_data(task)
+                    if context_content is not None:
+                        exec_context = {"inputs": {"CONTEXT_DATA": context_content}}
+                result, output, error = executor.execute(code_to_run, context=exec_context)
                 exec_time_total += (time.time() - exec_start)
                 
                 output_str = str(output) if output is not None else ""

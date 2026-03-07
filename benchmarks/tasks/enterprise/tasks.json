@@ -6,7 +6,7 @@
     "description": "Parse a JSON config file and validate required fields and types.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -30,7 +30,7 @@
     "description": "Scan a log file for ERROR and WARNING patterns and count occurrences.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -55,7 +55,7 @@
     "description": "Read, validate, and construct configuration from environment variables.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -73,7 +73,7 @@
     "description": "Implement a retry decorator that succeeds on the 3rd attempt after simulated failures.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -91,7 +91,7 @@
     "description": "Extract JSON data, transform (filter and lowercase), load (return stats).",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -115,7 +115,7 @@
     "description": "Implement a simple finite state machine for an order processing workflow.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -133,7 +133,7 @@
     "description": "Implement a circuit breaker that opens after 3 failures.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -152,7 +152,7 @@
     "description": "Implement a token bucket rate limiter.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -170,7 +170,7 @@
     "description": "Simulate a connection pool with max connections and timeout.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -188,7 +188,7 @@
     "description": "Batch multiple API requests into a single payload.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -206,7 +206,7 @@
     "description": "Aggregate health checks from multiple services.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -224,7 +224,7 @@
     "description": "Evaluate feature flags with user targeting and percentage rollout.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -242,7 +242,7 @@
     "description": "Execute a Directed Acyclic Graph of dependent tasks.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -261,7 +261,7 @@
     "description": "Implement event sourcing pattern with append-only events and state reconstruction.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -279,7 +279,7 @@
     "description": "Implement a simple leader election using bully algorithm concept.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -297,7 +297,7 @@
     "description": "Ensure operations are idempotent using key tracking.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [

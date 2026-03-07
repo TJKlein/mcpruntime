@@ -21,8 +21,11 @@ class BaselineExecutor:
 
 class SubprocessBaseline(BaselineExecutor):
     """Executes code via raw subprocess python3."""
-    
-    def execute(self, code: str) -> Tuple[ExecutionResult, Optional[str], Optional[str]]:
+
+    def execute(self, code: str, context: Optional[Dict[str, Any]] = None) -> Tuple[ExecutionResult, Optional[str], Optional[str]]:
+        if context and (context.get("inputs") or {}).get("CONTEXT_DATA") is not None:
+            preamble = "CONTEXT_DATA = {}\n\n".format(repr(context["inputs"]["CONTEXT_DATA"]))
+            code = preamble + code
         script_path = Path(self.workspace) / f"script_{uuid.uuid4().hex[:8]}.py"
         script_path.write_text(code)
             

@@ -34,7 +34,7 @@ docker compose up
 ---
 ## ⚡️ Quick Start
 
-MCPRuntime uses **OpenSandbox** as its default execution backend, which runs code in Docker containers. OpenSandbox provides reliable sandboxing with full PTC (Programmatic Tool Calling) support.
+MCPRuntime uses **OpenSandbox** as its default execution backend, which runs code in Docker containers. OpenSandbox provides reliable sandboxing with full PTC (Programmatic Tool Calling) and **RLM (Recursive Language Model)** support—context data and the `ask_llm` callback are injected so infinite-context tasks work in the sandbox.
 
 ### Option A — OpenSandbox (Default, recommended)
 *Requires: Docker + one install command*
@@ -349,36 +349,40 @@ This provides actionable insights: *How well does OpenSandbox support my agent w
 | **Iterations Needed** | How many retries for agent to succeed |
 | **Category Breakdown** | Per-category success rates reveal workload characteristics |
 
-### The 83 Task Taxonomy
+### Task Taxonomy
+
+All tasks run **with or without** `--recursive`. Some tasks **favor RLM** (optional context + `ask_llm` when recursive).
 
 *   **Programmatic Tool Calling (PTC)** (8): True PTC tasks requiring tool imports (calculator, weather, filesystem, database)
 *   **Compute** (19): Algorithms (FizzBuzz, sorting, dynamic programming, TSP, FFT)
 *   **Import-Heavy** (12): Package loading (pandas, numpy, scipy workflows)
-*   **I/O** (12): File operations, directory traversal, state management
+*   **I/O** (14): File operations, directory traversal, state management; includes tasks that favor RLM (find in log/doc)
 *   **Memory** (10): Data structures, allocation patterns
 *   **Concurrency** (10): Threading, asyncio, synchronization
 *   **Enterprise** (16): Real-world patterns (ETL, state machines, retry logic)
 
 ### Running MRBS
 
-MRBS has **two evaluation modes** with different purposes:
+MRBS has **evaluation modes** and an optional **RLM (recursive)** mode:
 
 **1. LLM Mode (Realistic Agent Evaluation)**
 ```bash
 # LLM generates code from natural language prompts
 python -m benchmarks run --backend opensandbox --llm-provider azure_openai
 
+# With --recursive: tasks that favor RLM get CONTEXT_DATA + ask_llm; others unchanged
+python -m benchmarks run --backend opensandbox --llm-provider azure_openai --recursive
+# Without --recursive: same tasks run with CONTEXT_DATA only (no ask_llm)
+
 # Results: ~70-90% pass rate (realistic - LLMs make mistakes!)
-# Report: "Our agent achieves 83% on MRBS with gpt-5.2-chat"
 ```
 
 **2. Baseline Mode (Infrastructure Verification)**
 ```bash
-# Runs hand-written reference code (no LLM)
+# Runs hand-written reference code (no LLM). Tasks with context get CONTEXT_DATA injected.
 python -m benchmarks run --backend opensandbox --llm-provider none
 
-# Results: ~100% pass rate on compute, ~75% on PTC (expected - verifies infrastructure)
-# Report: "OpenSandbox executes 19/19 compute + 6/8 PTC tasks"
+# Results: ~100% pass rate on compute, ~75% on PTC (expected)
 ```
 
 **Backend:**

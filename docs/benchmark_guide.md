@@ -27,11 +27,11 @@ This provides actionable insights for:
 
 MRBS is unique because it tests what happens **after** the LLM writes code: will it run? how fast? does the output validate?
 
-## The 83 Task Taxonomy
+## Task Taxonomy
 
-Tasks are organized by the runtime characteristics they stress:
+Tasks are organized by the runtime characteristics they stress. **All tasks are executable with and without recursion** (with or without `--recursive`). Some tasks **favor RLM**: they have optional context (`context_data_source`); when present, `CONTEXT_DATA` is injected in both modes, and with `--recursive`, `ask_llm` is also available for chunked reasoning.
 
-### 1. **Programmatic Tool Calling (PTC)** (8 tasks) ⭐ **NEW**
+### 1. **Programmatic Tool Calling (PTC)** (8 tasks)
 True PTC tasks where the agent must import and call tools rather than write standalone code:
 - Calculator: `call_mcp_tool('calculator', 'add', {...})`
 - Weather: `call_mcp_tool('weather', 'get_weather', {...})`
@@ -50,8 +50,8 @@ Standalone algorithmic tasks: FizzBuzz, Fibonacci, sorting, dynamic programming,
 Package loading and data processing: pandas, numpy, JSON parsing.
 - *Agent challenge*: Using correct library APIs and handling data correctly
 
-### 4. **File I/O** (12 tasks)
-Filesystem operations: read, write, directory traversal, temp files.
+### 4. **File I/O** (14 tasks)
+Filesystem operations: read, write, directory traversal, temp files. Includes tasks that **favor RLM** (e.g. find ERROR in log, find secret in document) via optional `CONTEXT_DATA`; run with or without `--recursive`.
 - *Agent challenge*: Proper file handling, path management, cleanup
 
 ### 5. **Memory** (10 tasks)
@@ -106,7 +106,18 @@ python -m benchmarks run --backend opensandbox --categories compute,io --llm-pro
 
 # Full suite with statistical confidence (N=5 runs per task)
 python -m benchmarks run --backend opensandbox --runs 5 --llm-provider azure_openai --output report.md
+
+# Include RLM (infinite-context) tasks: use RecursiveAgent and ask_llm
+python -m benchmarks run --backend opensandbox --llm-provider azure_openai --recursive
+
+# RLM tasks only (find-in-log, find-secret-in-doc, etc.)
+python -m benchmarks run --backend opensandbox --categories rlm --llm-provider azure_openai --recursive --runs 1
 ```
+
+**Running the same tasks with vs without `--recursive`:**
+- **Without `--recursive`**: All tasks run, including RLM. For RLM tasks the executor injects **only `CONTEXT_DATA`** (no `ask_llm`). The agent can generate code that uses `CONTEXT_DATA` directly (e.g. search in a loop); if it generates code that calls `ask_llm`, that call will fail at runtime.
+- **With `--recursive`**: Same RLM tasks run via **RecursiveAgent** with **`CONTEXT_DATA` + `ask_llm`** injected, so the agent can reason over chunks with the LLM.
+- You can compare results: run once with `--recursive` and once without to see how the same RLM tasks perform with vs without recursive (chunked) reasoning.
 
 **Note:** With LLM mode, pass rates are typically 80-90% (not 100%) because:
 - LLM may generate code with syntax errors
@@ -220,9 +231,10 @@ python -m benchmarks compare --backends opensandbox,subprocess --runs 3
 ## Command Options
 
 - `--backend [opensandbox|subprocess]`: Execution environment (OpenSandbox recommended)
-- `--categories [list]`: Comma-separated task categories
+- `--categories [list]`: Comma-separated task categories (e.g. `compute`, `rlm`, `ptc`)
 - `--runs [int]`: Number of repetitions per task for statistical significance
 - `--llm-provider [openai|anthropic|azure_openai|none]`: LLM for agent code generation
+- `--recursive`: Enable full RLM (Recursive Language Model) for tasks with `context_data_source`: use RecursiveAgent and inject `ask_llm` in addition to `CONTEXT_DATA`. Without `--recursive`, the same RLM tasks still run but only `CONTEXT_DATA` is injected (no `ask_llm`), so you can compare pass rates with and without recursive reasoning.
 - `--llm-model [name]`: Specific model to use
 - `--output [file.md]`: Save report to file
 

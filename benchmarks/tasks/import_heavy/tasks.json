@@ -6,7 +6,7 @@
     "description": "Import pandas library and create a basic DataFrame to verify it loads correctly.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -24,7 +24,7 @@
     "description": "Import json module and parse a large JSON array containing 10,000 objects.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -43,7 +43,7 @@
     "description": "Import numpy and create a zero-filled array, then set and read a value.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -61,7 +61,7 @@
     "description": "Use pandas to read a CSV file and compute basic statistics on the sales data.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -85,7 +85,7 @@
     "description": "Group sales data by category and calculate sum and mean for each group.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -109,7 +109,7 @@
     "description": "Merge two DataFrames on product_id and calculate total values.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "custom",
     "custom_validator": "check_merge",
@@ -137,7 +137,7 @@
     "description": "Perform matrix multiplication and SVD on large random matrices.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "fuzzy",
     "tags": [
@@ -155,7 +155,7 @@
     "description": "Use re module to extract email addresses and phone numbers from text.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -174,7 +174,7 @@
     "description": "Create a multi-dimensional pivot table from sales data.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -198,7 +198,7 @@
     "description": "Import pandas, numpy, scipy, and verify they all load correctly.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -216,7 +216,7 @@
     "description": "Execute a chained pandas workflow: filter, transform, group, sort.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "exact",
     "tags": [
@@ -240,7 +240,7 @@
     "description": "Perform T-test and ANOVA using scipy.stats on generated data.",
     "supported_backends": [
       "opensandbox",
-      "subprocess",
+      "subprocess"
     ],
     "validation_type": "fuzzy",
     "tags": [

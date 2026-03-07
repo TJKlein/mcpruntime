@@ -30,7 +30,9 @@ class Task:
     timeout: int = 30
     tags: List[str] = field(default_factory=list)
     min_score: float = 1.0
-    
+    # RLM (Recursive Language Model): path to fixture file for CONTEXT_DATA (relative to category fixtures/)
+    context_data_source: Optional[str] = None
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "Task":
         """Create a Task from a dictionary."""
@@ -54,7 +56,8 @@ class Task:
             reference_code=data.get("reference_code", ""),
             prompt=data.get("prompt", None),
             max_retries=data.get("max_retries", 3),
-            setup_files=data.get("setup_files", [])
+            setup_files=data.get("setup_files", []),
+            context_data_source=data.get("context_data_source", None),
         )
 
 
