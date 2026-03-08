@@ -212,6 +212,18 @@ class SkillsBenchRunner(BenchmarkRunner):
             task.prompt = task.prompt + "\n" + skill_context
             logger.info(f"  -> Injected skill context (prompt now {len(task.prompt)} chars)")
         
+        # Subprocess backend: SkillsBench tasks often assume /root; inject workspace root
+        # so generated code writes to the actual cwd and does not use /root.
+        if self.backend == "subprocess" and task.prompt:
+            root = self._benchmark_project_root()
+            workspace_abs = (root / self.config.execution.workspace_dir.lstrip("./")).resolve()
+            path_note = (
+                f"\n\n[Execution: subprocess. Write all output files (e.g. answer.json, reports, CSVs) "
+                f"to the current working directory. Workspace root (use this or '.'): {workspace_abs} "
+                f"Do not use /root — it is not available in this environment.]"
+            )
+            task.prompt = task.prompt + path_note
+        
         try:
             # Run task using parent class
             result = super().run_task(task)
@@ -493,7 +505,9 @@ class SkillsBenchRunner(BenchmarkRunner):
         )
         
         # Condition-specific metrics
-        if self.condition == SkillCondition.RUNTIME_EVOLVED_SKILLS:
+        if self.condition == SkillCondition.CURATED_SKILLS:
+            metrics.curated_skills_loaded = self.condition_manager.curated_skill_count()
+        elif self.condition == SkillCondition.RUNTIME_EVOLVED_SKILLS:
             metrics.skills_verified = len([
                 p for p in self.condition_manager.skill_provenance.values()
                 if p.execution_verified

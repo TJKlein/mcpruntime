@@ -131,6 +131,10 @@ class ConditionManager:
     def set_curated_skill(self, task_id: str, skill_content: str) -> None:
         """Set the curated skill for a task (condition 2)."""
         self._curated_skills[task_id] = skill_content
+
+    def curated_skill_count(self) -> int:
+        """Return how many tasks have curated skill content (for metrics)."""
+        return len(self._curated_skills)
         
     def set_self_generated_skill(
         self,

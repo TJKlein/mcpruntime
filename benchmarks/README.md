@@ -123,3 +123,27 @@ The harness then computes and reports:
 For detailed taxonomy, metrics, and reporting guidelines, see **[PTC-Bench Guide](../docs/benchmark_guide.md)**.
 
 For expected results and interpretations, see **[RESULTS.md](RESULTS.md)**.
+
+## SkillsBench: Skill Effectiveness Evaluation
+
+The `skillsbench` command runs a **4-condition evaluation** on SkillsBench tasks:
+
+```bash
+# Quick 10-task evaluation (20-30 minutes)
+python -m benchmarks skillsbench \
+    --local-skillsbench ~/Downloads/skillsbench \
+    --backend subprocess \
+    --condition all \
+    --limit 10 \
+    --output results/quickstart
+```
+
+**The 4 Conditions:**
+1. `no_skills` - Baseline without skill augmentation
+2. `curated_skills` - Human-written skills from SkillsBench
+3. `self_generated_skills` - Model generates skills before execution
+4. `runtime_evolved_skills` - Skills extracted from successful executions (MCPRuntime's approach)
+
+This enables direct empirical comparison of whether execution-grounded skill evolution succeeds where speculation-based generation fails.
+
+> See **[SkillsBench Implementation Guide](skillsbench/docs/IMPLEMENTATION_SUMMARY.md)** for full setup, troubleshooting, and paper guidance.

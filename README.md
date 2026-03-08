@@ -62,6 +62,30 @@ python examples/00_simple_api.py
 
 ---
 
+## ⚡️ Quick Start — Subprocess (No Docker)
+
+For a **Docker-free setup** that works immediately on macOS/Linux:
+
+```bash
+# 1. Install (no Docker required!)
+pip install mcp-agent-runtime
+
+# 2. Set API key
+export OPENAI_API_KEY=your-key-here
+
+# 3. Run with subprocess backend
+python examples/00_simple_api.py --backend subprocess
+```
+
+**Recommended for:**
+- SkillsBench evaluation
+- macOS development (where Docker has issues)
+- Quick prototyping without container setup
+
+> See [SkillsBench Guide](benchmarks/skillsbench/docs/IMPLEMENTATION_SUMMARY.md) for the Docker-free SkillsBench quickstart.
+
+---
+
 ## 1. Architecture
 
 MCPRuntime standardizes the interaction between the semantic agent (LLM) and the execution environment (Kernel).
@@ -377,6 +401,36 @@ python -m benchmarks run --backend opensandbox --llm-provider none
 - **OpenSandbox** (Docker via server): ~75-80% pass rate on PTC easy tasks, ~3s per task. Full PTC support.
 
 > See **[MRBS Guide](docs/benchmark_guide.md)** for statistical rigor, reporting guidelines, and detailed taxonomy.
+
+### SkillsBench Integration: 4-Condition Skill Evaluation
+
+MCPRuntime includes a **SkillsBench integration** for evaluating skill effectiveness across 4 conditions:
+
+1. **NO_SKILLS** - Baseline without any skill augmentation
+2. **CURATED_SKILLS** - Human-written skills from SkillsBench
+3. **SELF_GENERATED_SKILLS** - Model generates skills before execution (speculative)
+4. **RUNTIME_EVOLVED_SKILLS** - Skills extracted from successful executions (execution-grounded)
+
+**Quick Start:**
+```bash
+# Clone SkillsBench locally (required for environment files)
+git clone https://github.com/benchflow-ai/skillsbench.git ~/Downloads/skillsbench
+
+# Install with benchmark dependencies
+pip install -e ".[benchmark]"
+
+# Run 4-condition evaluation
+python -m benchmarks skillsbench \
+    --local-skillsbench ~/Downloads/skillsbench \
+    --backend subprocess \
+    --condition all \
+    --limit 10 \
+    --output results/skillsbench
+```
+
+> **Note:** The subprocess backend is recommended for macOS (no Docker required). It automatically handles SkillsBench's `/root/` path assumptions by substituting the actual workspace path.
+
+> See **[SkillsBench Implementation Guide](benchmarks/skillsbench/docs/IMPLEMENTATION_SUMMARY.md)** for detailed setup, troubleshooting, and paper writing guidance.
 
 ## 11. Development and Testing
 

@@ -26,6 +26,11 @@ class SubprocessBaseline(BaselineExecutor):
         if context and (context.get("inputs") or {}).get("CONTEXT_DATA") is not None:
             preamble = "CONTEXT_DATA = {}\n\n".format(repr(context["inputs"]["CONTEXT_DATA"]))
             code = preamble + code
+        
+        # SkillsBench tasks often write to /root/; replace with workspace path for macOS/subprocess
+        workspace_abs = str(Path(self.workspace).resolve())
+        code = code.replace("/root/", workspace_abs + "/")
+        
         script_path = Path(self.workspace) / f"script_{uuid.uuid4().hex[:8]}.py"
         script_path.write_text(code)
             

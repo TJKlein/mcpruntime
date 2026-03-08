@@ -38,6 +38,16 @@ def print_step(step: str, status: str = ""):
 def test_skill_sandbox_integration():
     """Test skill execution in sandbox."""
     pytest.importorskip("opensandbox", reason="opensandbox required for skill-sandbox integration")
+    
+    # Check if OpenSandbox server is actually running
+    try:
+        import httpx
+        client = httpx.Client(timeout=2.0)
+        resp = client.get("http://localhost:8080/api/v1/health")
+        if resp.status_code != 200:
+            pytest.skip("OpenSandbox server not reachable")
+    except Exception:
+        pytest.skip("OpenSandbox server not running")
     print("=" * 60)
     print("MCPRuntime Skill-Sandbox Integration Test")
     print("=" * 60)

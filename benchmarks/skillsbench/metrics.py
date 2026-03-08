@@ -124,6 +124,7 @@ class SkillsBenchMetrics:
     skills_verified: int = 0  # Runtime-evolved: verified working
     skills_speculative: int = 0  # Self-generated: unverified
     skill_verification_rate: float = 0.0  # % of generated skills that work
+    curated_skills_loaded: int = 0  # CURATED_SKILLS: how many tasks had curated skill content
     
     # NEURIPS: Stratified results (detect ordering effects)
     stratified_pass_rates: Optional[Dict[str, Any]] = None  # early/middle/late
@@ -153,6 +154,7 @@ class SkillsBenchMetrics:
             "effect_size_vs_self_generated": self.effect_size_vs_self_generated,
             "skills_verified": self.skills_verified,
             "skills_speculative": self.skills_speculative,
+            "curated_skills_loaded": self.curated_skills_loaded,
             "skill_verification_rate": self.skill_verification_rate,
             "stratified_pass_rates": self.stratified_pass_rates,
             "task_results": self.task_results,

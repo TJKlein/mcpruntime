@@ -8,11 +8,24 @@ import pytest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-# Skip entire module if opensandbox not installed (executor.execute() would raise)
+# Skip entire module if opensandbox not installed or server not running
+import httpx
 try:
     from opensandbox.sandbox import Sandbox as _Sandbox
+    # Check if server is actually reachable
+    _client = httpx.AsyncClient(timeout=2.0)
+    _SERVER_AVAILABLE = False
+    try:
+        import asyncio
+        resp = asyncio.get_event_loop().run_until_complete(
+            _client.get("http://localhost:8080/api/v1/health")
+        )
+        _SERVER_AVAILABLE = resp.status_code == 200
+    except Exception:
+        _SERVER_AVAILABLE = False
 except ImportError:
     _Sandbox = None
+    _SERVER_AVAILABLE = False
 
 from client.code_generator import HAS_LITELLM
 from client.recursive_agent import RecursiveAgent
@@ -21,7 +34,7 @@ from client.filesystem_helpers import FilesystemHelper
 from client.base import ExecutionResult
 
 
-@pytest.mark.skipif(_Sandbox is None, reason="opensandbox not installed")
+@pytest.mark.skipif(_Sandbox is None or not _SERVER_AVAILABLE, reason="opensandbox not installed or server not running")
 class TestRecursiveAgentIntegration:
 
     @pytest.fixture
